@@ -1,82 +1,88 @@
-#include <string>
-#include <vector>
-#include <algorithm>
-
-
-using namespace std;
-
-
-class Symbol{
-	private:
-		string m_name;
-		unsigned int m_size;
-		unsigned int m_offset;
-	public:
-		Symbol(string name, unsigned int size, unsigned int offset = 0) : m_name(name), m_size(size), m_offset(offset) {}
-		~Symbol() = default;
-		bool operator==(const Symbol &symbol){ return (this->m_name == symbol.m_name);}
-		string getName() const {return m_name;}
-		unsigned int getSize() const {return m_size;}
-		unsigned int getOffset() const {return m_offset;}
-		void setName(string name) {m_name = name;}
-		void setSize(unsigned int size) {m_size = size;}
-		void setOffset(unsigned int offset) {m_offset = offset;}
-};
-
-
-class SymbolTable{
-
-	private:
-		vector< vector<Symbol> > symbols;
-		unsigned int level;
-		unsigned int offset;
-
-	public:
-		SymbolTable() : level(1), offset(0) {
-			symbols.resize(level);
-		}
-		~SymbolTable(){}
-		void startBlock() {
-			level++;
-			symbols.resize(level);
-		}
-		void endBlock() {
-			symbols.pop_back();
-		}
-		void addSymbol(string name, unsigned int size) {
-			symbols[level-1].push_back(Symbol(name, size, offset));
-			//fix offset
-			if (size == 1)
-				offset += 2;
-			else
-				offset += size;
-		}
-		Symbol& findSymbol(int string) {
-			
-			for(unsigned int i = level - 1; i >= 0; i--){
-				//std::find_if(symbols[i].begin(), symbols[i].end(),);
-			}
-		} 
+#include "SymbolTable.h"
 
 
 
-};
 
 
-/*
-class FunctionManager{
-public:
-	FunctionManager(){}
-	~FunctionManager(){}
+Symbol::Symbol(string name, unsigned int size, unsigned int offset) : m_name(name), m_size(size), m_offset(offset) {}
 
-	void addFunction( std::pair < std::string, std::list<TokenType> > signature, int line, bool isImplemented) {}
-	
-};
-*/
+Symbol::~Symbol() {}
 
-
-int main ()
+bool Symbol::operator==(const Symbol &symbol) 
 {
-	SymbolTable st;
+	return (this->m_name == symbol.m_name);
+}
+
+string Symbol::getName() const 
+{
+	return m_name;
+}
+
+unsigned int Symbol::getSize() const 
+{
+	return m_size;
+}
+
+unsigned int Symbol::getOffset() const 
+{
+	return m_offset;
+}
+
+void Symbol::setName(string name) 
+{
+	m_name = name;
+}
+
+void Symbol::setSize(unsigned int size) 
+{
+	m_size = size;
+}
+
+void Symbol::setOffset(unsigned int offset) 
+{
+	m_offset = offset;
+}
+
+
+
+SymbolTable::SymbolTable() : level(1), offset(0) 
+{
+	symbols.resize(level);
+}
+
+SymbolTable::~SymbolTable()
+{
 
 }
+
+void SymbolTable::startBlock() 
+{
+	level++;
+	symbols.resize(level);
+}
+
+void SymbolTable::endBlock() 
+{
+	level--;
+	symbols.pop_back();
+}
+
+void SymbolTable::addSymbol(string name, unsigned int size) 
+{
+	symbols[level-1].push_back(Symbol(name, size, offset));
+	//fix offset
+	if (size == 1)
+		offset += 2;
+	else
+		offset += size;
+}
+
+Symbol& SymbolTable::findSymbol(string name) const 
+{
+	for(unsigned int i = level - 1; i >= 0; i--){
+		vector<Symbol>::iterator it = std::find(symbols[i].begin(), symbols[i].end(), Symbol(name, 0, 0));
+		if (it != symbols[i].end())
+			return *it;
+	}
+	throw SymbolNotFound();
+} 
