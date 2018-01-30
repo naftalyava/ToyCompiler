@@ -1,26 +1,26 @@
 
 #include "Buffer.h"
 
-Buffer::Buffer(){};
+Buffer::Buffer(){}
 
-Buffer::~Buffer(){};
+Buffer::~Buffer(){}
 
 void Buffer::emit(string &instruction)
 {
     code.push_back(instruction);
 }
 
-void Buffer::backPatch(list<unsigned int> &lines, string &address);
+void Buffer::backPatch(list<unsigned int> &lines, string &address)
 {
 
 }
 
-unsigned int Buffer::nextQuad();
+unsigned int Buffer::nextQuad()
 {
-    code.push_back(command);
+    return (code.size() + 1);
 }
 
-void Buffer::bufferToRiski(string filename);
+void Buffer::bufferToRiski(string filename)
 {
     ofstream riskFile;
     riskFile.open(filename.c_str());

@@ -17,6 +17,7 @@ class Function{
         vector<unsigned int> m_args;
         vector<int> callLines;
     public:
+    Function() {}
     Function(string name) : m_name(name), 
                             m_isImplemented(false), 
                             m_isMain(false), 
@@ -26,18 +27,21 @@ class Function{
                             m_args()
     {}
 
+    void setReturnType(unsigned int returnType) {m_returnType = returnType;}
     void setIsImplemented(bool isImplemented) {m_isImplemented = isImplemented;}
-    void setIsMain(bool isMain) {m_isMain = isMain;}
+    //void setIsMain(bool isMain) {m_isMain = isMain;}
     void setHasReturn(bool hasReturn) {m_hasReturn = hasReturn;}
     void setLine(unsigned int line) {m_line = line;}
+    unsigned int getReturnType() const {return m_returnType;}
     bool getIsImplemented() const {return m_isImplemented;}
     bool getIsMain() const {return m_isMain;}
     bool getHasReturn() const {return m_hasReturn;}
-    void addCallLine(int line) {callLines.push_back(line);
+    void addCallLine(int line) { callLines.push_back(line); };
     vector<int> getCallLine() {return callLines;}
     string getName() {return m_name;}
     unsigned int getLine() const {return m_line;}
     void addArgument(unsigned int arg) {m_args.push_back(arg);}
+    void addArguments(vector<unsigned int> args) {m_args.insert(m_args.end(), args.begin(), args.end());}
     bool operator==(Function &other){
         if ( (this->m_name != other.m_name) || 
              (this->m_returnType != other.m_returnType) || 

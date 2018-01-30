@@ -3,6 +3,12 @@
 
 #include <string>
 #include <stdio.h>
+#include <vector>
+#include <set>
+
+#include "SymbolTable.h"
+#include "Function.h"
+#include "Buffer.h"
 
 
 /*
@@ -12,15 +18,7 @@
 typedef enum {INT8, INT16, INT32, VOID, INVALID} TokenType;
 
 typedef struct{
-	TokenType type;
-	std::string value;
-	int registerNum;
-	int addr;
-
-	int quad;
-	std::set<int> nextList;
-	std::set<int> trueList;
-	std::set<int> falseList;
+    char*	value;
 } yystype;
 
 #define YYSTYPE yystype

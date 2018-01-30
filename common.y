@@ -20,10 +20,10 @@ void yyerror(const char*);
 /*******************************************
 * Globals
 *******************************************/
-	Buffer buffer = new Buffer();
-	SymbolTable symbol_table = new SymbolTable();
-	Function current_function = new Function(); 
-	RegistersManager registers_manager = new RegistersManager();
+Buffer *buffer = new Buffer();
+SymbolTable *symbol_table = new SymbolTable();
+Function *current_function = new Function(); 
+//RegistersManager registers_manager = new RegistersManager();
 %}
 
 /*******************************************
@@ -53,8 +53,6 @@ void yyerror(const char*);
 %right H_OPM  // {
 %left H_CPM   // }
 
-%precedence H_THEN
-%precedence H_ELSE
 
 
 
@@ -215,7 +213,10 @@ ASSN : LVAL H_ASSIGN EXP H_SEMI
 
 }
 		
-LVAL : H_ID 									{$$.nodeptr = makeNode("id",$1.value, NULL); free($1.value);}
+LVAL : H_ID
+{
+
+}
 
 
 CNTRL : H_IF BEXP H_THEN STMT H_ELSE STMT
