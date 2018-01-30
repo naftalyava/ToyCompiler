@@ -10,18 +10,21 @@ using namespace std;
 
 class Buffer {
     private:
-        vector<string> header;
+        string header;
         vector<string> code;
         unsigned int nextLine;
         vector<Function> implemented;
         vector<Function> unimplemented;
 
 	public:
-	Buffer() {}
-        ~Buffer() {}
-		void emit(string &instruction) {}
-		void backPatch(list<unsigned int> &lines, string &address);
-		unsigned int nextQuad();
+	Buffer();
+    ~Buffer();
+    void emit(string &instruction);
+    void backPatch(list<unsigned int> &lines, string &address);
+    unsigned int nextQuad();
+    void bufferToRiski(string filename);
+    void writeHeader();
+    void addFunction(Function func);
 	
 };
 
