@@ -17,7 +17,7 @@ void Buffer::backPatch(list<unsigned int> &lines, string &address);
 
 unsigned int Buffer::nextQuad();
 {
-    code.push_back(command);
+    return code.size() +1;
 }
 
 void Buffer::bufferToRiski(string filename);
