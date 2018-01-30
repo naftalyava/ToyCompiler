@@ -78,7 +78,11 @@ FDEFS:	FDEFS FUNC_API BLK
 
 FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR        	
 {
+	//check if func name already exist in the symbol table pf the functions.
 
+	// if Yes, then check if the arguments match.
+
+	// if every thing is ok (doesn't exist in ST and Args OK) then update current function.
 }
 
 
@@ -109,30 +113,33 @@ BLK : H_OPM STLIST H_CPM
 
 DCL : H_ID H_COLON TYPE
 {
-
+	// update the $$ dclList with the given id:type
+	// Update $$ type according to $3 type / value.
 }
 		
 | H_ID H_COMMA DCL
 {
-
+	// add id to the $$ dclList
+	// Set the $$ according to the $3 type.
+	// concat the $3 dclList to the $$ dclList
 }
 
 TYPE : H_INT8
 {
-	
+	$$.type = INT8;
 }
 
 | H_INT16
 {
-	
+	$$.type = INT16;
 }
 | H_INT32
 {
-	
+	$$.type = INT32;
 }
 | H_VOID
 {
-	
+	$$.type = VOID;
 }
 
 
