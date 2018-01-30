@@ -20,10 +20,10 @@ void yyerror(const char*);
 /*******************************************
 * Globals
 *******************************************/
-Buffer *buffer = new Buffer();
-SymbolTable *symbol_table = new SymbolTable();
-Function *current_function = new Function(); 
-//RegistersManager registers_manager = new RegistersManager();
+	Buffer buffer = new Buffer();
+	SymbolTable symbol_table = new SymbolTable();
+	Function current_function = new Function(); 
+	RegistersManager registers_manager = new RegistersManager();
 %}
 
 /*******************************************
@@ -53,6 +53,8 @@ Function *current_function = new Function();
 %right H_OPM  // {
 %left H_CPM   // }
 
+%precedence H_THEN
+%precedence H_ELSE
 
 
 
@@ -88,20 +90,25 @@ FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR
 
 FUNC_ARGS : FUNC_ARGLIST
 {
-
+	//update $$ dclList = $1 dclList
 }
 |
-{}
+{
+	//function recieve no arguments?
+}
 
 
 FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL 		
 {
-
+	// check semantic error of $3 (No Void)
+	// concat $3 to the end of $1.
+	// Update the $$ dclList
 }
 
 | DCL
 {
-
+	// check semantic error (No Void)
+	// update the $$ dclList according to $1
 }
 	
 
@@ -220,9 +227,9 @@ ASSN : LVAL H_ASSIGN EXP H_SEMI
 
 }
 		
-LVAL : H_ID
+LVAL : H_ID 									
 {
-
+	
 }
 
 
