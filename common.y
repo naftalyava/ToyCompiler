@@ -73,7 +73,6 @@ FDEFS:	FDEFS FUNC_API
 	buffer.emit("COPYI I2 0"); //INT SP
 
 	//initiate ST 
-	//add $2 dclList to the ST
 
 } BLK {
 	// Set function as implemented
@@ -128,6 +127,8 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 
 BLK : H_OPM STLIST H_CPM
 {
+	// if current function has arguments and ST is empty ( we are in the bigger block) 
+	// add the current function dclList to the ST.
 	//add $2 dclList to the ST and check for sematic errors
 }										
 
