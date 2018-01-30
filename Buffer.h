@@ -17,7 +17,7 @@ class Buffer {
         vector<Function> unimplemented;
 
 	public:
-		Buffer() {}
+	Buffer() {}
         ~Buffer() {}
 		void emit(string &instruction) {}
 		void backPatch(list<unsigned int> &lines, string &address);
