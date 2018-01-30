@@ -1,7 +1,8 @@
 # ToyCompiler
 
 What was done so far:
-The following files were mostly implemented Function.h Symbol.h SymbolTable.h.
+
+The following files were mostly implemented: Function.h Symbol.h SymbolTable.h.
 Bare skeleton was written for Buffer.h
 
 
