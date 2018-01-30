@@ -15,6 +15,7 @@ class Function{
         unsigned int m_line;
         unsigned int m_returnType; // 0 - void, 1 - int8, 2 - int16, 4 - int32 
         vector<unsigned int> m_args;
+        vector<int> callLines;
     public:
     Function(string name) : m_name(name), 
                             m_isImplemented(false), 
@@ -32,6 +33,9 @@ class Function{
     bool getIsImplemented() const {return m_isImplemented;}
     bool getIsMain() const {return m_isMain;}
     bool getHasReturn() const {return m_hasReturn;}
+    void addCallLine(int line) {callLines.push_back(line);
+    vector<int> getCallLine() {return callLines;}
+    string getName() {return m_name;}
     unsigned int getLine() const {return m_line;}
     void addArgument(unsigned int arg) {m_args.push_back(arg);}
     bool operator==(Function &other){
