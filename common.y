@@ -65,14 +65,28 @@ PROGRAM: FDEFS
 }
 
 
-FDEFS:	FDEFS FUNC_API BLK 
+FDEFS:	FDEFS FUNC_API  
 {
+	//init SP and FP
+	buffer.emit("COPYI I0 0");
+	buffer.emit("COPYI I1 0"); //INT FP
+	buffer.emit("COPYI I2 0"); //INT SP
 
+	//initiate ST 
+	//add $2 dclList to the ST
+
+} BLK {
+	// Set function as implemented
+	// Set function line
+	// Add function to function manager
+	// if there is no return to the current function (add return)
+	// Set current function as NULL
 }
 
 | FDEFS FUNC_API H_SEMI 
 {
-
+	// Set function as unimplemented
+	// Set current function as NULL
 }
 |
 {}	
@@ -114,7 +128,7 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 
 BLK : H_OPM STLIST H_CPM
 {
-
+	//add $2 dclList to the ST and check for sematic errors
 }										
 
 
@@ -229,7 +243,7 @@ ASSN : LVAL H_ASSIGN EXP H_SEMI
 		
 LVAL : H_ID 									
 {
-	
+
 }
 
 
