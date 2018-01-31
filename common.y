@@ -440,7 +440,39 @@ EXP : EXP H_ADDOP EXP
 
 | H_OPR TYPE H_CPR EXP
 {
+	cout << "EXP : H_OPR TYPE H_CPR EXP" << endl;
+	cout << "$2.type: " << $2.type << endl;
+	cout << "$4.type: " << $4.type << endl;
+	cout << "to_string(32 - 8 * $4.type): " << to_string(32 - 8 * $4.type) << endl;
 
+	$$.type = $2.type;
+
+	//cast from big to small
+	if ($4.type > $2.type) {
+		int tmp =  register_manager->getRegister();
+		buffer->emit("LDI" + to_string($2.type * 8) + " I" + to_string(tmp)
+						   + " I" + to_string($4.reg) + " 0");
+		$$.reg = register_manager->getRegister();
+		buffer->emit("SLAI I" + to_string($$.reg) + " I" 
+							 + to_string(tmp) + " "+ to_string(32 - 8 * $2.type));
+		buffer->emit("SRAI I" + to_string($$.reg) + " I" 
+		                     + to_string($$.reg) + " " + to_string(32 - 8 * $2.type));
+		buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($$.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
+	}
+	else if ($4.type < $2.type)	{
+		int tmp =  register_manager->getRegister();
+		buffer->emit("LDI" + to_string($2.type * 8) + " I" + to_string(tmp)
+						   + " I" + to_string($4.reg) + " 0");
+		$$.reg = register_manager->getRegister();
+		buffer->emit("SLAI I" + to_string($$.reg) + " I" 
+							 + to_string(tmp) + " "+ to_string(32 - 8 * $4.type));
+		buffer->emit("SRAI I" + to_string($$.reg) + " I" 
+		                     + to_string($$.reg) + " " + to_string(32 - 8 * $4.type));
+	}
+	else {
+
+	}
+		
 }
 
 | H_ID

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include <set>
+#include <math.h>
 
 #include "SymbolTable.h"
 #include "Function.h"
