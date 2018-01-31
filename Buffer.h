@@ -27,6 +27,7 @@ class Buffer {
         void bufferToRiski(string filename);
         //void writeHeader(vector<Function> implemented, vector<Function> unimplemented);
         void addFunction(Function func);
+        Function& findFunction(string name);
 	
 };
 

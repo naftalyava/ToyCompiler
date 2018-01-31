@@ -107,3 +107,24 @@ void Buffer::writeHeader(vector<Function> implemented, vector<Function> unimplem
 }
 
 */
+
+
+Function& Buffer::findFunction(string name)
+{
+    cout << "look in implemented" << endl;
+    for (int i=0; i < implemented.size(); i++){
+        if (implemented[i].getName() == name){
+            cout << "function: " << name << " is found" << endl;
+            return implemented[i];
+        }
+    }
+
+    cout << "look in unimplemented" << endl;
+    for (int i=0; i < unimplemented.size(); i++){
+        if (unimplemented[i].getName() == name){
+            cout << "function: " << name << " is found" << endl;
+            return unimplemented[i];
+        }
+    }
+
+}

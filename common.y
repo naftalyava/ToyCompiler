@@ -362,7 +362,11 @@ EXP : EXP H_ADDOP EXP
 
 | H_ID
 {
-	
+	Symbol &symbol = symbol_table->findSymbol($1.value);
+	DCL_Node dcl_node;
+	dcl_node.type = symbol.getSize();
+	dcl_node.name = $1.value;
+	$$.dcl_list.push_back(dcl_node);
 }
 
 | H_NUM
@@ -378,13 +382,46 @@ EXP : EXP H_ADDOP EXP
 
 CALL : H_ID H_OPR CALL_ARGS H_CPR
 {
+	//Construct function
+
+
+	cout << "called: " << $1.value << endl;
+	Function &func = buffer->findFunction($1.value);
+	cout << "function: " << func.getName() << "is found" << endl;
+	cout << "is implemented: " << func.getIsImplemented() << endl;
+
+	vector<unsigned int> args = func.getArguments();
+	cout << "get arguments done" << endl;
+	
+
+	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
+	cout << "args.size(): " << args.size() << endl;
+	if ($3.dcl_list.size() != args.size()){
+
+	} else {
+		for (int i=0; i < args.size(); i++){
+			if (args[i] != $3.dcl_list.size()){
+
+			} else {
+
+			}
+		}
+
+		if (!func.getIsImplemented()){
+			func.addCallLine(buffer->getQuad());
+			cout << "call lines was updated for:" << endl;
+			cout << "func name: " << func.getName() << " line: " << buffer->getQuad() << endl;
+		}
+			
+	}
+ 
 
 }
 
 
 CALL_ARGS : CALL_ARGLIST				
 {
-	
+	$$.dcl_list = $1.dcl_list;
 }
 |
 {}
@@ -392,11 +429,12 @@ CALL_ARGS : CALL_ARGLIST
 
 CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP			
 {
-
+	$$.dcl_list.insert($1.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
+	$$.dcl_list.insert($1.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
 }
 | EXP						
 {
-
+	$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
 }			
 			
 

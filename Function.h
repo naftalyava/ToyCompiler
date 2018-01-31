@@ -56,6 +56,8 @@ class Function{
         }
         return true;
     }
+
+    vector<unsigned int> getArguments() { return m_args; }
 };
 
 #endif
