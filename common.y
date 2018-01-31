@@ -397,14 +397,25 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
 	cout << "args.size(): " << args.size() << endl;
 	if ($3.dcl_list.size() != args.size()){
-
+		cout << "Mismatch number of arguments" << endl;
 	} else {
 		for (int i=0; i < args.size(); i++){
 			if (args[i] != $3.dcl_list.size()){
-
-			} else {
-
+				//Need to do casting? if Not, error
 			}
+			switch(args[i])
+			{
+				case 1:
+					buffer->emit("");
+					break;
+				case 2:
+					buffer->emit("");
+					break;
+				case 4:
+					buffer->emit("");
+					break;
+			}
+			
 		}
 
 		if (!func.getIsImplemented()){
