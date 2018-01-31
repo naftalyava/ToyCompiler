@@ -348,7 +348,7 @@ CNTRL : H_IF BEXP H_THEN STMT H_ELSE STMT
 
 BEXP : BEXP H_OR BEXP
 {
-	
+
 }
 
 | BEXP H_AND BEXP
@@ -374,17 +374,68 @@ BEXP : BEXP H_OR BEXP
 																					
 EXP : EXP H_ADDOP EXP
 {
+	cout << "EXP : EXP H_ADDOP EXP" << endl;
+	cout << "$2.value: " << $2.value << endl;
+	//Handle error
+	cout << "$1.type: " << $1.type << endl;
+	cout << "$3.type: " << $3.type << endl;
+
+	if ($1.type != $3.type){
+		cout << "Semantic error: <type mismatch> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
+
+
+	if (strcmp($2.value, "+") == 0){
+		$$.reg = register_manager->getRegister();
+		buffer->emit("ADD2I I" + to_string($$.reg) 
+	                       + " I" + to_string($1.reg)
+						   + " I" + to_string($3.reg) 
+						   );
+	} 
+	else if (strcmp($2.value, "-") == 0){
+		$$.reg = register_manager->getRegister();
+		buffer->emit("SUBTI I" + to_string($$.reg) 
+	                       + " I" + to_string($1.reg)
+						   + " I" + to_string($3.reg) 
+						   );
+	} else {
+		cout << "ERROR" << endl;
+	}
+	$$.type = $1.type;
 	
 }
 
 | EXP H_MULOP EXP
 {
+	if ($1.type != $3.type){
+		cout << "Semantic error: <type mismatch> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
 
+	if (strcmp($2.value, "*") == 0){
+		$$.reg = register_manager->getRegister();
+		buffer->emit("MULTI I" + to_string($$.reg) 
+	                       + " I" + to_string($1.reg)
+						   + " I" + to_string($3.reg) 
+						   );
+	} 
+	else if (strcmp($2.value, "/") == 0){
+		$$.reg = register_manager->getRegister();
+		buffer->emit("DIVDI I" + to_string($$.reg) 
+	                       + " I" + to_string($1.reg)
+						   + " I" + to_string($3.reg) 
+						   );
+		
+	} else {
+		cout << "ERROR" << endl;
+	}
+	$$.type = $1.type;
 }
 
 | H_OPR EXP H_CPR						
 {
-
+	$$ = $2;
 }
 
 | H_OPR TYPE H_CPR EXP
@@ -408,6 +459,7 @@ EXP : EXP H_ADDOP EXP
 		buffer->emit("LDI32 I" + to_string($$.reg) 
 						 + " I1 " 
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
+		$$.type = symbol_table->findSymbol($1.value).getSize();
 	} catch (...) {
 
 	}
