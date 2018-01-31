@@ -5,7 +5,7 @@ Buffer::Buffer(){}
 
 Buffer::~Buffer(){}
 
-void Buffer::emit(string &instruction)
+void Buffer::emit(string instruction)
 {
     code.push_back(instruction);
 }
@@ -24,13 +24,14 @@ void Buffer::bufferToRiski(string filename)
 {
     ofstream riskFile;
     riskFile.open(filename.c_str());
-    for (auto line : this->bufferLines) 
+    for (auto line : this->code) 
     {
         riskFile << line << endl;
     }
     riskFile.close();
 }
 
+/*
 void Buffer::writeHeader(vector<Function> implemented, vector<Function> unimplemented)
 {
     header += "<header>\n";
@@ -38,7 +39,7 @@ void Buffer::writeHeader(vector<Function> implemented, vector<Function> unimplem
     header += "<unimplemented>";
     for(std::vector<Function>::iterator it = unimplemented.begin(); it != unimplemented.end(); ++it)
     {
-        header += it.getName();
+        header += *it.getName();
         for (std::vector<int>::iterator it2 = it.getCallLine().begin(); it2 != it.getCallLine().end(); ++it2)
         {
             header += "," + to_string(it2);
@@ -49,7 +50,7 @@ void Buffer::writeHeader(vector<Function> implemented, vector<Function> unimplem
         header += "<implemented>";
     for(std::vector<Function>::iterator it = implemented.begin(); it != implemented.end(); ++it)
     {
-        header += it.getName();
+        header += *it.getName();
         for (std::vector<int>::iterator it2 = it.getCallLine().begin(); it2 != it.getCallLine().end(); ++it2)
         {
             header += "," + to_string(it2);
@@ -60,4 +61,4 @@ void Buffer::writeHeader(vector<Function> implemented, vector<Function> unimplem
     header += "</header>\n";
 }
 
-	
+*/
