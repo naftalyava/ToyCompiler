@@ -37,6 +37,9 @@ void Buffer::bufferToRiski(string filename)
     riskFile << "<unimplemented>";
     for (auto func : this->unimplemented){
         riskFile << " " << func.getName();
+        for (auto line : func.getCallLine()){
+            riskFile << "," << to_string(line);
+        }
     }
     riskFile << endl;
     riskFile << "<implemented>";
