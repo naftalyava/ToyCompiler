@@ -421,19 +421,29 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 
 CALL_ARGS : CALL_ARGLIST				
 {
+	cout << "CALL_ARGS : CALL_ARGLIST" << endl;
 	$$.dcl_list = $1.dcl_list;
 }
 |
-{}
+{	
+	$$.dcl_list.empty();
+	cout << "$$.dcl_list.size(): " << $$.dcl_list.size() << endl;
+}
 
 
 CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP			
 {
+	cout << "CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP" << endl;
+	cout << "before insert $$.dcl_list.size(): " << $$.dcl_list.size() << endl;
+	cout << "$1.dcl_list.size(): " << $1.dcl_list.size() << endl;
+	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
 	$$.dcl_list.insert($1.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
 	$$.dcl_list.insert($1.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
+	cout << "after insert $$.dcl_list.size(): " << $$.dcl_list.size() << endl;
 }
 | EXP						
 {
+	cout << "CALL_ARGLIST : EXP" << endl;
 	$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
 }			
 			

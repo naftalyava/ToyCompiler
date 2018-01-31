@@ -1,0 +1,22 @@
+int8 func3();
+int16 func4();
+
+void func1(){
+	a, b, c:int32;
+	d:int16;
+	d = func4();
+}
+
+void func2(a:int8, b:int32){
+	a, b, c:int32;
+}
+
+
+
+void main(){
+	a:int8;
+	b,c:int32;
+	a = func3();
+}
+
+
