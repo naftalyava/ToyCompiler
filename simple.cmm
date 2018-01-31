@@ -4,6 +4,12 @@ int16 func4();
 void func1(){
 	a, b, c:int32;
 	d:int16;
+	write("\nat main BLK a=");
+	write(a);
+	write(b);
+	write(2);
+	write(a+2);
+	write(a+b);
 	d = func4();
 }
 
@@ -18,5 +24,3 @@ void main(){
 	b,c:int32;
 	a = func3();
 }
-
-

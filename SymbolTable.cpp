@@ -25,6 +25,7 @@ void SymbolTable::endBlock()
 
 void SymbolTable::addSymbol(string name, unsigned int size) 
 {
+	cout << "Symbol: " << name << " offset: " << offset << endl;
 	symbols[level-1].push_back(Symbol(name, size, offset));
 	//fix offset
 	if (size == 1)

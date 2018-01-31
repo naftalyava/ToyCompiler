@@ -23,7 +23,8 @@ void yyerror(const char*);
 *******************************************/
 extern Buffer *buffer;
 extern SymbolTable *symbol_table;
-extern Function *current_function; 
+extern Function *current_function;
+extern RegisterManager *register_manager;
 
 %}
 
@@ -80,6 +81,8 @@ FDEFS:	FDEFS FUNC_API
 
 	// if there is no return to the current function (add return)
 	// Set current function as NULL
+	//symbol_table->startScope();
+
 } BLK {
 	
 	
@@ -151,6 +154,12 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 
 	// update the $$ dclList according to $1
 	$$.dcl_list = $1.dcl_list;
+	cout << "About to add symbols" << endl;
+	for (unsigned int i = 0; i < $$.dcl_list.size(); i++){
+		symbol_table->addSymbol($$.dcl_list[i].name, $$.dcl_list[i].type);
+	}
+	cout << "Symbols were added" << endl;
+	
 }
 	
 
@@ -175,6 +184,8 @@ DCL : H_ID H_COLON TYPE
 
 	// Update $$ type according to $3 type / value.
 	$$.type = $3.type;
+	cout << "DCL : H_ID H_COLON TYPE" << endl;
+	
 }
 		
 | H_ID H_COMMA DCL
@@ -188,6 +199,9 @@ DCL : H_ID H_COLON TYPE
 
 	// concat the $3 dclList to the $$ dclList
 	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
+
+	cout << "DCL : H_ID H_COMMA DCL" << endl;
+	//symbol_table->addSymbol($1.value, $3.type);
 }
 
 TYPE : H_INT8
@@ -222,8 +236,10 @@ STMT :  DCL H_SEMI
 {
 	for (int i= 0; i<$1.dcl_list.size(); i++){
 		if ($1.dcl_list[i].type == 1){
+			symbol_table->addSymbol($1.dcl_list[i].name, 2);
 			buffer->emit("ADD2I I2 I2 " + to_string(2));
 		} else {
+			symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
 			buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
 		}
 	}
@@ -271,12 +287,28 @@ RETURN : H_RETURN EXP H_SEMI
 
 WRITE : H_WRITE H_OPR EXP H_CPR H_SEMI
 {
-	
+	buffer->emit("PRNTI I" + to_string($3.reg));
 }
 		
 | H_WRITE H_OPR H_STR H_CPR H_SEMI
 {
-	
+	unsigned tmp;
+	cout << "H_STR: " << $3.value << endl;
+	for (int i=0; i < strlen($3.value); i++){
+		if ($3.value[i] == '\\' && $3.value[i+1] == 'n'){
+			tmp = '\n';
+			i++;
+		} 
+		else if ($3.value[i] == '\\' && $3.value[i+1] == 't') {
+			tmp = '\t';
+			i++;
+		}
+		else {
+			tmp = $3.value[i];
+		}
+		
+		buffer->emit("PRNTC " + to_string(tmp));
+	}
 }
 
 
@@ -362,16 +394,31 @@ EXP : EXP H_ADDOP EXP
 
 | H_ID
 {
+	cout << "EXP: H_ID start" << endl; 
 	Symbol &symbol = symbol_table->findSymbol($1.value);
+	cout << "symbol is found" << endl; 
+	
 	DCL_Node dcl_node;
 	dcl_node.type = symbol.getSize();
 	dcl_node.name = $1.value;
 	$$.dcl_list.push_back(dcl_node);
+
+	try {
+		$$.reg = register_manager->getRegister();
+		buffer->emit("LDI32 I" + to_string($$.reg) 
+						 + " I1 " 
+						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
+	} catch (...) {
+
+	}
+	cout << "EXP: H_ID end" << endl;
 }
 
 | H_NUM
 {
-	
+	$$.reg = register_manager->getRegister();
+	buffer->emit("COPYI I" + to_string($$.reg) 
+						   + " " + $1.value);
 }
 		
 | CALL
@@ -400,7 +447,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 		cout << "Mismatch number of arguments" << endl;
 	} else {
 		for (int i=0; i < args.size(); i++){
-			if (args[i] != $3.dcl_list.size()){
+			if (args[i] != $3.dcl_list[i].type){
 				//Need to do casting? if Not, error
 			}
 			switch(args[i])

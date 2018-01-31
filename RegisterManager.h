@@ -1,6 +1,5 @@
 #ifndef REGISTERS_MANAGER_H_
 #define REGISTERS_MANAGER_H_
-#include "definitions.h"
 
 
 class RegisterManager {

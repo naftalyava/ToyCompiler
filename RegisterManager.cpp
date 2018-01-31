@@ -1,7 +1,7 @@
 #include "RegisterManager.h"
 
 RegisterManager::RegisterManager() {
-	counter = 0;
+	counter = 3;
 }
 
 RegisterManager::~RegisterManager() {}

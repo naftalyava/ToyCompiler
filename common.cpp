@@ -9,7 +9,7 @@
 Buffer *buffer = new Buffer();
 SymbolTable *symbol_table = new SymbolTable();
 Function *current_function = new Function(); 
-//RegistersManager *registers_manager = new RegistersManager();
+RegisterManager *register_manager = new RegisterManager();
 
 int rs;
 

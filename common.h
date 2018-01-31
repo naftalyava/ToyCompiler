@@ -9,6 +9,7 @@
 #include "SymbolTable.h"
 #include "Function.h"
 #include "Buffer.h"
+#include "RegisterManager.h"
 
 
 /*
@@ -28,6 +29,7 @@ typedef struct{
     char*	value;
     unsigned int type;
     unsigned int quad;
+    unsigned int reg;
     vector<DCL_Node> dcl_list;
 } yystype;
 
