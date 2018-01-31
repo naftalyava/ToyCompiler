@@ -231,7 +231,7 @@ STMT :  DCL H_SEMI
 
 | ASSN
 {
-	
+	cout << "STMT : ASSN" << endl;
 }
 
 | EXP H_SEMI
@@ -289,7 +289,7 @@ READ : H_READ H_OPR LVAL H_CPR H_SEMI
 
 ASSN : LVAL H_ASSIGN EXP H_SEMI
 {
-
+cout << "ASSN : LVAL H_ASSIGN EXP H_SEMIN" << endl;
 }
 		
 LVAL : H_ID 									
@@ -426,7 +426,8 @@ CALL_ARGS : CALL_ARGLIST
 }
 |
 {	
-	$$.dcl_list.empty();
+	cout << "CALL_ARGLIST : EPSILON - 1" << endl;
+	$$.dcl_list.clear();
 	cout << "$$.dcl_list.size(): " << $$.dcl_list.size() << endl;
 }
 
