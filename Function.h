@@ -27,6 +27,7 @@ class Function{
                             m_args()
     {}
 
+    void setName(string name) {m_name = name;}
     void setReturnType(unsigned int returnType) {m_returnType = returnType;}
     void setIsImplemented(bool isImplemented) {m_isImplemented = isImplemented;}
     //void setIsMain(bool isMain) {m_isMain = isMain;}

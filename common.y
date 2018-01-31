@@ -1,6 +1,7 @@
 %{
 
 #include <string.h>
+#include <iostream>
 #include "common.h"
 
 
@@ -20,10 +21,10 @@ void yyerror(const char*);
 /*******************************************
 * Globals
 *******************************************/
-	Buffer buffer = new Buffer();
-	SymbolTable symbol_table = new SymbolTable();
-	Function current_function = new Function(); 
-	RegistersManager registers_manager = new RegistersManager();
+extern Buffer *buffer;
+extern SymbolTable *symbol_table;
+extern Function *current_function; 
+
 %}
 
 /*******************************************
@@ -53,8 +54,7 @@ void yyerror(const char*);
 %right H_OPM  // {
 %left H_CPM   // }
 
-%precedence H_THEN
-%precedence H_ELSE
+
 
 
 
@@ -67,24 +67,30 @@ PROGRAM: FDEFS
 
 FDEFS:	FDEFS FUNC_API  
 {
-	//init SP and FP
-	buffer.emit("COPYI I0 0");
-	buffer.emit("COPYI I1 0"); //INT FP
-	buffer.emit("COPYI I2 0"); //INT SP
-
 	//initiate ST 
-
-} BLK {
 	// Set function as implemented
+	current_function->setIsImplemented(true);
+	current_function->setLine(buffer->getQuad());
 	// Set function line
+	
+
 	// Add function to function manager
+	buffer->addFunction(*current_function);
+
+
 	// if there is no return to the current function (add return)
 	// Set current function as NULL
+} BLK {
+	
+	
+
 }
 
 | FDEFS FUNC_API H_SEMI 
 {
 	// Set function as unimplemented
+	current_function->setIsImplemented(false);
+	buffer->addFunction(*current_function);
 	// Set current function as NULL
 }
 |
@@ -98,6 +104,24 @@ FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR
 	// if Yes, then check if the arguments match.
 
 	// if every thing is ok (doesn't exist in ST and Args OK) then update current function.
+	current_function->setName($2.value);
+	current_function->setReturnType($1.type);
+	
+	if ($1.type == VOID){
+		current_function->setReturnType(0);
+	} 
+	else if($1.type == INT8){
+		current_function->setReturnType(1);
+	}
+	else if($1.type == INT16){
+		current_function->setReturnType(2);
+	}
+	else if($1.type == INT32){
+		current_function->setReturnType(4);
+	}	
+
+
+	
 }
 
 
@@ -114,54 +138,74 @@ FUNC_ARGS : FUNC_ARGLIST
 FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL 		
 {
 	// check semantic error of $3 (No Void)
+
 	// concat $3 to the end of $1.
+
 	// Update the $$ dclList
+
 }
 
 | DCL
 {
 	// check semantic error (No Void)
+
 	// update the $$ dclList according to $1
+	$$.dcl_list = $1.dcl_list;
 }
 	
 
-BLK : H_OPM STLIST H_CPM
+BLK : H_OPM 
 {
+	$$.quad = buffer->getQuad();
 	// if current function has arguments and ST is empty ( we are in the bigger block) 
+
 	// add the current function dclList to the ST.
+
+	
+} STLIST H_CPM {
 	//add $2 dclList to the ST and check for sematic errors
-}										
+}								
 
 
 DCL : H_ID H_COLON TYPE
 {
 	// update the $$ dclList with the given id:type
+	DCL_Node node = {$1.value, $3.type, yylineno};
+	$$.dcl_list.push_back(node);
+
 	// Update $$ type according to $3 type / value.
+	$$.type = $3.type;
 }
 		
 | H_ID H_COMMA DCL
 {
 	// add id to the $$ dclList
+	DCL_Node node = {$1.value, $3.type, yylineno};
+	$$.dcl_list.push_back(node);
+
 	// Set the $$ according to the $3 type.
+	$$.type = $3.type;
+
 	// concat the $3 dclList to the $$ dclList
+	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
 }
 
 TYPE : H_INT8
 {
-	$$.type = INT8;
+	$$.type = 1;
 }
 
 | H_INT16
 {
-	$$.type = INT16;
+	$$.type = 2;
 }
 | H_INT32
 {
-	$$.type = INT32;
+	$$.type = 4;
 }
 | H_VOID
 {
-	$$.type = VOID;
+	$$.type = 0;
 }
 
 
@@ -176,7 +220,13 @@ STLIST : STLIST STMT
 
 STMT :  DCL H_SEMI
 {
-	
+	for (int i= 0; i<$1.dcl_list.size(); i++){
+		if ($1.dcl_list[i].type == 1){
+			buffer->emit("ADD2I I2 I2 " + to_string(2));
+		} else {
+			buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
+		}
+	}
 }
 
 | ASSN

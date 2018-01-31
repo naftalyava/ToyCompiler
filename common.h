@@ -17,8 +17,18 @@
 
 typedef enum {INT8, INT16, INT32, VOID, INVALID} TokenType;
 
+typedef struct {
+    string name;
+    unsigned int type;
+    unsigned int quad;
+} DCL_Node;
+
+
 typedef struct{
     char*	value;
+    unsigned int type;
+    unsigned int quad;
+    vector<DCL_Node> dcl_list;
 } yystype;
 
 #define YYSTYPE yystype

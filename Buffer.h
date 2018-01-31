@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <fstream>
 #include "Function.h"
 
 using namespace std;
@@ -12,19 +13,20 @@ class Buffer {
     private:
         string header;
         vector<string> code;
-        unsigned int nextLine;
+        unsigned int quad;
         vector<Function> implemented;
         vector<Function> unimplemented;
 
 	public:
-	Buffer();
-    ~Buffer();
-    void emit(string &instruction);
-    void backPatch(list<unsigned int> &lines, string &address);
-    unsigned int nextQuad();
-    void bufferToRiski(string filename);
-    void writeHeader();
-    void addFunction(Function func);
+        Buffer();
+        ~Buffer();
+        void emit(string instruction);
+        void backPatch(list<unsigned int> &lines, string &address);
+        unsigned int nextQuad();
+        unsigned int getQuad();
+        void bufferToRiski(string filename);
+        //void writeHeader(vector<Function> implemented, vector<Function> unimplemented);
+        void addFunction(Function func);
 	
 };
 
