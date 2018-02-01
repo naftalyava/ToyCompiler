@@ -2,6 +2,7 @@
 #define REGISTERS_MANAGER_H_
 
 #include <vector>
+#include <iostream>
 
 using namespace std;
 

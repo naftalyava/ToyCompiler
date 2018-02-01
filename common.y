@@ -82,11 +82,14 @@ FDEFS:	FDEFS FUNC_API
 
 	// if there is no return to the current function (add return)
 	// Set current function as NULL
-	//symbol_table->startScope();
+	//symbol_table = new SymbolTable();
+	register_manager->startScope();
 
 } BLK {
 	buffer->emit("RETRN");
 	//close scope
+	//delete symbol_table;
+	register_manager->endScope();
 }
 
 | FDEFS FUNC_API H_SEMI 
