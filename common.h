@@ -23,6 +23,7 @@ typedef struct {
     string name;
     unsigned int type;
     unsigned int quad;
+    unsigned int node_reg;
 } DCL_Node;
 
 
