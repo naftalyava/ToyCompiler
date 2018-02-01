@@ -85,9 +85,8 @@ FDEFS:	FDEFS FUNC_API
 	//symbol_table->startScope();
 
 } BLK {
-	
-	
-
+	buffer->emit("RETRN");
+	//close scope
 }
 
 | FDEFS FUNC_API H_SEMI 
@@ -321,7 +320,7 @@ STMT :  DCL H_SEMI
 }		
 | RETURN
 {
-	
+
 }
 | BLK
 {
@@ -331,12 +330,13 @@ STMT :  DCL H_SEMI
 
 RETURN : H_RETURN EXP H_SEMI
 {
-	
+	buffer->emit("STI32 I" + to_string($2.reg) +" I1 -4");
+	buffer->emit("RETRN");
 }
 
 | H_RETURN H_SEMI
 {
-	
+	buffer->emit("RETRN");
 }
 
 
