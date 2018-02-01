@@ -1,26 +1,43 @@
 #include "RegisterManager.h"
 
 RegisterManager::RegisterManager() {
-	counter = 3;
+	scope.push_back(3);
 }
 
 RegisterManager::~RegisterManager() {}
 
 int RegisterManager::getRegister(){ //get next register
 
-if(counter == 1023 ){
-	//operational error!
-}
+	if (scope.size() >= 1023){
+		//ERROR
+	}
 
-return counter++;
+	return scope[scope.size()]++;
 }
 
 
 int RegisterManager::getRegistersCount(){
-	return counter;
+	return scope[scope.size()];
 }
 
 
 void RegisterManager::setRegistersCount(int toSet){
-	counter = toSet;
+	scope[scope.size()] = toSet;
+}
+
+
+void RegisterManager::startScope()
+{
+	scope.push_back(3);
+}
+
+
+void RegisterManager::endScope()
+{
+	if (scope.size() == 0){
+		//ERROR
+	}
+	else {
+		scope.pop_back();
+	}
 }
