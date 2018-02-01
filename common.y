@@ -77,6 +77,7 @@ FDEFS:	FDEFS FUNC_API
 
 	// Add function to function manager
 	buffer->addFunction(*current_function);
+	current_function->clearArgs();
 
 
 	// if there is no return to the current function (add return)
@@ -94,6 +95,7 @@ FDEFS:	FDEFS FUNC_API
 	// Set function as unimplemented
 	current_function->setIsImplemented(false);
 	buffer->addFunction(*current_function);
+	current_function->clearArgs();
 	// Set current function as NULL
 }
 |
@@ -123,14 +125,19 @@ FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR
 		current_function->setReturnType(4);
 	}	
 
-
+	for (int i = 0 ; i < $4.dcl_list.size(); i++)
+	{
+		current_function->addArgument($4.dcl_list[i].type);
+	}
+	cout <<  "currentFunc name: " << $2.value << endl;
+	cout << "currentFunc args count: " << current_function->getArguments().size() << endl;
 	
 }
 
 
 FUNC_ARGS : FUNC_ARGLIST
 {
-	//update $$ dclList = $1 dclList
+	$$.dcl_list = $1.dcl_list;
 }
 |
 {
@@ -140,6 +147,29 @@ FUNC_ARGS : FUNC_ARGLIST
 
 FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL 		
 {
+	cout << "FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL " << endl;
+	for (int i = 0; i < $$.dcl_list.size(); i++)
+	{
+		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+	}
+	cout << "----------------------" << endl;
+	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
+	for (int i = 0; i < $$.dcl_list.size(); i++)
+	{
+		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+	}
+
+	cout << "About to add symbols" << endl;
+	for (unsigned int i = 0; i < $3.dcl_list.size(); i++){
+		symbol_table->addSymbol($3.dcl_list[i].name, $3.dcl_list[i].type);
+		cout << "symbol name: " << $3.dcl_list[i].name << endl;
+		cout << "symbol size: " << $3.dcl_list[i].type << endl;
+	}
+
+	// DON'T ENABLE THIS LINE <------- BUG -------->
+	//$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
+	cout << "Symbols were added" << endl;
+
 	// check semantic error of $3 (No Void)
 
 	// concat $3 to the end of $1.
@@ -151,13 +181,27 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 | DCL
 {
 	// check semantic error (No Void)
-
+	cout << "FUNC_ARGLIST :	DCL " << endl;
 	// update the $$ dclList according to $1
-	$$.dcl_list = $1.dcl_list;
-	cout << "About to add symbols" << endl;
-	for (unsigned int i = 0; i < $$.dcl_list.size(); i++){
-		symbol_table->addSymbol($$.dcl_list[i].name, $$.dcl_list[i].type);
+	cout << "$1.dcl_list size: " <<  $1.dcl_list.size() << endl;
+	for (int i = 0; i < $1.dcl_list.size(); i++)
+	{
+		cout << "$1.dcl_list[i]: " <<  $1.dcl_list[i].name << endl;
 	}
+
+	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
+	for (int i = 0; i < $$.dcl_list.size(); i++)
+	{
+		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+	}
+
+	cout << "About to add symbols" << endl;
+	for (unsigned int i = 0; i < $1.dcl_list.size(); i++){
+		symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
+		cout << "symbol name: " << $1.dcl_list[i].name << endl;
+		cout << "symbol size: " << $1.dcl_list[i].type << endl;
+	}
+
 	cout << "Symbols were added" << endl;
 	
 }
@@ -178,29 +222,40 @@ BLK : H_OPM
 
 DCL : H_ID H_COLON TYPE
 {
+	cout << "DCL : H_ID H_COLON TYPE" << endl;
 	// update the $$ dclList with the given id:type
 	DCL_Node node = {$1.value, $3.type, yylineno};
 	$$.dcl_list.push_back(node);
-
+	cout << "$1.value: " << $1.value << endl;
 	// Update $$ type according to $3 type / value.
 	$$.type = $3.type;
-	cout << "DCL : H_ID H_COLON TYPE" << endl;
+	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
+	for (int i = 0; i < $$.dcl_list.size(); i++)
+	{
+		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+	}
+	
 	
 }
 		
 | H_ID H_COMMA DCL
 {
+	cout << "DCL : H_ID H_COMMA DCL" << endl;
 	// add id to the $$ dclList
 	DCL_Node node = {$1.value, $3.type, yylineno};
 	$$.dcl_list.push_back(node);
-
+	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
+	cout << "$1.value: " << $1.value << endl;
 	// Set the $$ according to the $3 type.
 	$$.type = $3.type;
-
+	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
+	for (int i = 0; i < $$.dcl_list.size(); i++)
+	{
+		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+	}
 	// concat the $3 dclList to the $$ dclList
-	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
+	//$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
 
-	cout << "DCL : H_ID H_COMMA DCL" << endl;
 	//symbol_table->addSymbol($1.value, $3.type);
 }
 
@@ -479,7 +534,8 @@ EXP : EXP H_ADDOP EXP
 {
 	cout << "EXP: H_ID start" << endl; 
 	Symbol &symbol = symbol_table->findSymbol($1.value);
-	cout << "symbol is found" << endl; 
+	cout << "symbol is found: " << $1.value << endl; 
+	cout << "symbol is size: " << symbol.getSize() << endl; 
 	
 	DCL_Node dcl_node;
 	dcl_node.type = symbol.getSize();
@@ -489,6 +545,7 @@ EXP : EXP H_ADDOP EXP
 	try {
 		$$.reg = 0; //to indecate we have already been loaded to register (only for variables)
 		dcl_node.node_reg = register_manager->getRegister();
+		cout << "EXP: H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
 		buffer->emit("LDI32 I" + to_string(dcl_node.node_reg) 
 						 + " I1 " 
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
@@ -530,11 +587,13 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
 	cout << "args.size(): " << args.size() << endl;
 	if ($3.dcl_list.size() != args.size()){
-		cout << "Mismatch number of arguments" << endl;
+		cout << "Semantic error: <Argument Number Mismatch> in line number <" << yylineno << ">" << endl;
+				exit(3);
 	} else {
 		for (int i=0; i < args.size(); i++){
 			if (args[i] != $3.dcl_list[i].type){
-				//Need to do casting? if Not, error
+				cout << "Semantic error: <Argument Type Mismatch> in line number <" << yylineno << ">" << endl;
+				exit(3);
 			}
 		}
 
@@ -548,17 +607,20 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
  
 
 	// Push registers in usage to the stack
-	int unknown_counter = 0;
+	int stack_counter = 0;
 	cout << "Push registers in usage to the stack , RegNum:" << register_manager->getRegistersCount() << endl;
 	for (int i = 0 ; i < register_manager->getRegistersCount(); i++)
 	{
 		buffer->emit("STI32 I" + to_string(i) + " I2 " + to_string(i*4));
-		unknown_counter = i*4;
+		stack_counter += 4;
 	}
+
+	//Make room for Return value And Arguments
+	stack_counter += 4;
+	int tmp = stack_counter + 4*($3.dcl_list.size());
+	buffer->emit("ADD2I I2 I2 " + to_string(tmp));
 	
-	//ADD2I I2 I2 X  <-------------- WAHT IS THIS?? and WHY?
-	buffer->emit("ADD2I I2 I2 " + to_string(unknown_counter + 8));
-	
+
 	//Move FP
 	buffer->emit("COPYI I1 I2");
 
@@ -566,9 +628,11 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	cout << "Push call arguments to the stack" << endl;
 	for (int i = $3.dcl_list.size()-1 ; i >= 0; i--)
 	{
-		cout << "Push call arguments to the stack" << endl;
-		buffer->emit("STI32 I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(-8 + i*4)); // Don't know why -8!!!!!
+		buffer->emit("STI32 I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(-4 - i*4)); // Don't know why -8!!!!!
+		stack_counter += 4;
 	}
+
+
 
 	//JLink
 	if (!func.getIsImplemented()){
@@ -581,15 +645,19 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	//Move FP back
 	buffer->emit("COPYI I2 I1");
 	
-	//Load return value??
+	//Load return value (always size == 4) --> Maybe we need to cast according to Func return type
+	buffer->emit("LDI32 I" + to_string(register_manager->getRegister()) + " I1 -4");
 
 	// Sub the extra jump we did for I2 <--------------
-	buffer->emit("SUBTI I2 I2 " + to_string(unknown_counter + 8));
+	buffer->emit("SUBTI I2 I2 " + to_string(stack_counter));
 
 	// Load registers back
 	cout << "Load registers from the stack" << endl;
-	for (int i = 0 ; i < register_manager->getRegistersCount(); i++)
-	{
+	for (int i = 0 ; i < register_manager->getRegistersCount() - 1 ; i++)
+	{										/* -1 for the register we used for the return value */
+		if (i == 2)
+			continue;
+
 		buffer->emit("LDI32 I" + to_string(i) + " I2 " + to_string(i*4));
 	}
 
@@ -599,7 +667,9 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 CALL_ARGS : CALL_ARGLIST				
 {
 	cout << "CALL_ARGS : CALL_ARGLIST" << endl;
+	cout << "$$.dcl_list size - 1: " << $$.dcl_list.size() <<endl;
 	$$.dcl_list = $1.dcl_list;
+	cout << "$$.dcl_list size - 2: " << $$.dcl_list.size() <<endl;
 }
 |
 {	
@@ -615,14 +685,17 @@ CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP
 	cout << "before insert $$.dcl_list.size(): " << $$.dcl_list.size() << endl;
 	cout << "$1.dcl_list.size(): " << $1.dcl_list.size() << endl;
 	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
-	$$.dcl_list.insert($1.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
-	$$.dcl_list.insert($1.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
-	cout << "after insert $$.dcl_list.size(): " << $$.dcl_list.size() << endl;
+
+	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
 }
 | EXP						
 {
 	cout << "CALL_ARGLIST : EXP" << endl;
-	$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end()); //This dcl_list will include only variables
+	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
+	for (int i = 0; i < $$.dcl_list.size(); i++)
+	{
+		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+	}
 }			
 			
 
