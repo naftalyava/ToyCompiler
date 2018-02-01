@@ -1,0 +1,13 @@
+int32 foo2()
+{
+  return 1;
+}
+
+int16 foo(c: int32)
+{
+  e:int32;
+
+  e = foo2 ();
+  e = e + c;
+  return ((int16)e);
+}
