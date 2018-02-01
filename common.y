@@ -484,17 +484,19 @@ EXP : EXP H_ADDOP EXP
 	DCL_Node dcl_node;
 	dcl_node.type = symbol.getSize();
 	dcl_node.name = $1.value;
-	$$.dcl_list.push_back(dcl_node);
+	
 
 	try {
-		$$.reg = register_manager->getRegister();
-		buffer->emit("LDI32 I" + to_string($$.reg) 
+		$$.reg = 0; //to indecate we have already been loaded to register (only for variables)
+		dcl_node.node_reg = register_manager->getRegister();
+		buffer->emit("LDI32 I" + to_string(dcl_node.node_reg) 
 						 + " I1 " 
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
 		$$.type = symbol_table->findSymbol($1.value).getSize();
 	} catch (...) {
 
 	}
+	$$.dcl_list.push_back(dcl_node);
 	cout << "EXP: H_ID end" << endl;
 }
 
@@ -534,19 +536,6 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 			if (args[i] != $3.dcl_list[i].type){
 				//Need to do casting? if Not, error
 			}
-			switch(args[i])
-			{
-				case 1:
-					buffer->emit("");
-					break;
-				case 2:
-					buffer->emit("");
-					break;
-				case 4:
-					buffer->emit("");
-					break;
-			}
-			
 		}
 
 		if (!func.getIsImplemented()){
@@ -557,6 +546,52 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 			
 	}
  
+
+	// Push registers in usage to the stack
+	int unknown_counter = 0;
+	cout << "Push registers in usage to the stack , RegNum:" << register_manager->getRegistersCount() << endl;
+	for (int i = 0 ; i < register_manager->getRegistersCount(); i++)
+	{
+		buffer->emit("STI32 I" + to_string(i) + " I2 " + to_string(i*4));
+		unknown_counter = i*4;
+	}
+	
+	//ADD2I I2 I2 X  <-------------- WAHT IS THIS?? and WHY?
+	buffer->emit("ADD2I I2 I2 " + to_string(unknown_counter + 8));
+	
+	//Move FP
+	buffer->emit("COPYI I1 I2");
+
+	// Push call arguments
+	cout << "Push call arguments to the stack" << endl;
+	for (int i = $3.dcl_list.size()-1 ; i >= 0; i--)
+	{
+		cout << "Push call arguments to the stack" << endl;
+		buffer->emit("STI32 I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(-8 + i*4)); // Don't know why -8!!!!!
+	}
+
+	//JLink
+	if (!func.getIsImplemented()){
+		buffer->emit("JLINK -1");
+	}
+	else{
+		buffer->emit("JLINK " + to_string(func.getLine()));
+	}
+
+	//Move FP back
+	buffer->emit("COPYI I2 I1");
+	
+	//Load return value??
+
+	// Sub the extra jump we did for I2 <--------------
+	buffer->emit("SUBTI I2 I2 " + to_string(unknown_counter + 8));
+
+	// Load registers back
+	cout << "Load registers from the stack" << endl;
+	for (int i = 0 ; i < register_manager->getRegistersCount(); i++)
+	{
+		buffer->emit("LDI32 I" + to_string(i) + " I2 " + to_string(i*4));
+	}
 
 }
 
@@ -587,7 +622,7 @@ CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP
 | EXP						
 {
 	cout << "CALL_ARGLIST : EXP" << endl;
-	$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
+	$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end()); //This dcl_list will include only variables
 }			
 			
 
