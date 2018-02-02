@@ -12,7 +12,7 @@ void Buffer::emit(string instruction)
     quad + 4;
 }
 
-void Buffer::backPatch(list<unsigned int> &lines, string &address)
+void Buffer::backPatch(set<unsigned int> &lines, unsigned int &address)
 {
 
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include "Function.h"
+#include <set>
 
 using namespace std;
 
@@ -21,7 +22,7 @@ class Buffer {
         Buffer();
         ~Buffer();
         void emit(string instruction);
-        void backPatch(list<unsigned int> &lines, string &address);
+        void backPatch(set<unsigned int> &lines, unsigned int &address);
         unsigned int nextQuad();
         unsigned int getQuad();
         void bufferToRiski(string filename);

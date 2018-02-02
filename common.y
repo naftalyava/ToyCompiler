@@ -220,7 +220,9 @@ BLK : H_OPM
 	// add the current function dclList to the ST.
 
 	
-} STLIST H_CPM {
+} STLIST M H_CPM {
+
+	buffer->backPatch($2.next_list , $3.quad);
 	//add $2 dclList to the ST and check for sematic errors
 	symbol_table->endBlock();
 }								
@@ -284,9 +286,11 @@ TYPE : H_INT8
 }
 
 
-STLIST : STLIST STMT
+STLIST : STLIST M STMT
 {
-	
+	$$.next_list = $3.next_list;
+	$3.next_list.clear(); //will be taken care by backPatching the LIST in the next derevation
+	buffer->backPatch($1.next_list, $2.quad);
 }
 
 |
@@ -306,33 +310,17 @@ STMT :  DCL H_SEMI
 	}
 }
 
-| ASSN
-{
-	cout << "STMT : ASSN" << endl;
-}
+| ASSN{}
 
-| EXP H_SEMI
-{
-	
-}
+| EXP H_SEMI{}
 | CNTRL
-{}
-| READ
 {
-	
-}		
-| WRITE
-{
-	
-}		
-| RETURN
-{
-
+	$$.next_list = $1.next_list;
 }
-| BLK
-{
-	
-}
+| READ{}		
+| WRITE{}		
+| RETURN{}
+| BLK{}
 
 
 RETURN : H_RETURN EXP H_SEMI
@@ -392,25 +380,36 @@ LVAL : H_ID
 }
 
 
-CNTRL : H_IF BEXP H_THEN STMT H_ELSE STMT
+CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT
 {
-	
+	buffer->backPatch($2.true_list, $4.quad);
+	buffer->backPatch($2.false_list, $8.quad);
+	// //MERGE all three to S list
+	set<int> tmp;
+	//MERGE(tmp, $5.next_list, $7.next_list);
+	//MERGE($$.next_list, tmp, $9.next_list);
 }
 																					
-| H_IF BEXP H_THEN STMT
+| H_IF BEXP H_THEN M STMT
 {
-
+	buffer->backPatch($2.true_list , $4.quad);
+	//MERGE($$.next_list, $2.false_list, $5.next_list);
 }
 
-| H_WHILE BEXP H_DO STMT
+| H_WHILE M BEXP H_DO M STMT
 {
-	
+	buffer->backPatch($6.next_list , $2.quad);
+	buffer->backPatch($3.true_list , $5.quad);
+	$$.next_list = $3.false_list;
+	buffer->emit("UJUMP " + to_string($2.quad));
 }
 
 
-BEXP : BEXP H_OR BEXP
+BEXP : BEXP H_OR M BEXP
 {
-
+	buffer->backPatch($1.true_list , $3.quad);
+	$$.true_list = $4.true_list;
+	//MERGE($$.false_list, $1.false_list , $4.false_list);
 }
 
 | BEXP H_AND BEXP
@@ -425,12 +424,50 @@ BEXP : BEXP H_OR BEXP
 																								  
 | EXP H_RELOP EXP
 {
-	
+	cout << "BEXP: EXP H_RELOP EXP" << endl;
+	cout << "RELOP: " << $2.value << endl;
+	if ($1.type != $3.type)
+	{
+		cout << "Sssssssssssssssssssss" << endl;
+		exit(3);
+	}
+
+	$$.reg = register_manager->getRegister();
+	string relop;
+	string branch;
+
+	if (strcmp($2.value, "<") == 0)
+	{
+		cout << "detected rel-op" << endl;
+		relop.assign("SLETI");
+		branch.assign("BREQZ");
+		cout << "detected rel-op" << endl;
+	}
+	int reg1 = $1.reg;
+	int reg3 = $3.reg;
+
+	if (reg1 == 0)
+	{
+		$1.dcl_list[0].node_reg;
+	}
+
+	if (reg3 == 0)
+	{
+		$3.dcl_list[0].node_reg;
+	}
+
+	buffer->emit(relop + " I"+ to_string($$.reg) + " I" +to_string($1.reg) + " I" +to_string($3.reg));
+	$$.false_list.insert(buffer->nextQuad());
+	buffer->emit(branch);
+	$$.true_list.insert(buffer->nextQuad());
+	buffer->emit("UJUMP");
+
 }
 
 | H_OPR BEXP H_CPR
 {
-	
+	$$.true_list = $2.true_list;
+	$$.false_list = $2.false_list;
 }
 																				
 																					
@@ -558,8 +595,8 @@ EXP : EXP H_ADDOP EXP
 	
 
 	try {
-		$$.reg = 0; //to indecate we have already been loaded to register (only for variables)
-		dcl_node.node_reg = register_manager->getRegister();
+		 //to indecate we have already been loaded to register (only for variables)
+		$$.reg = dcl_node.node_reg = register_manager->getRegister();
 		cout << "EXP: H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
 		buffer->emit("LDI32 I" + to_string(dcl_node.node_reg) 
 						 + " I1 " 
@@ -716,16 +753,16 @@ CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP
 
 M : 
 {
-	$$.quad = buffer.nextQuad();
+	$$.quad = buffer->nextQuad();
 }
 
 N :
 {
-	// update nextList
-	$$.nextList.insert(buffer.nextQuad());
+	// update next_list
+	$$.next_list.insert(buffer->nextQuad());
 
 	// prepare space for jump
-	buffer.emit("UJUMP ");
+	buffer->emit("UJUMP ");
 }
 			
 			

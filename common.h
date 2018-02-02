@@ -33,6 +33,9 @@ typedef struct{
     unsigned int quad;
     unsigned int reg;
     vector<DCL_Node> dcl_list;
+    set<unsigned int> true_list;
+    set<unsigned int> false_list;
+    set<unsigned int> next_list;
 } yystype;
 
 #define YYSTYPE yystype
