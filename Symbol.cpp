@@ -1,7 +1,7 @@
 #include "Symbol.h"
 
 
-Symbol::Symbol(string name, unsigned int size, unsigned int offset) : m_name(name), m_size(size), m_offset(offset) {}
+Symbol::Symbol(string name, unsigned int size, int offset) : m_name(name), m_size(size), m_offset(offset) {}
 
 Symbol::~Symbol() {}
 
@@ -20,7 +20,7 @@ unsigned int Symbol::getSize() const
 	return m_size;
 }
 
-unsigned int Symbol::getOffset() const 
+int Symbol::getOffset() const 
 {
 	return m_offset;
 }
@@ -35,7 +35,7 @@ void Symbol::setSize(unsigned int size)
 	m_size = size;
 }
 
-void Symbol::setOffset(unsigned int offset) 
+void Symbol::setOffset(int offset) 
 {
 	m_offset = offset;
 }

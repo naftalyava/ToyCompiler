@@ -86,6 +86,14 @@ FDEFS:	FDEFS FUNC_API
 	symbol_table = new SymbolTable();
 	register_manager->startScope();
 
+	cout << "adding function arguments to symbol_table" << endl;
+
+	for (int i = $2.dcl_list.size() - 1; i >= 0; i--){
+		cout << "adding: " << $2.dcl_list[i].name << endl; 
+		symbol_table->addArgumentSymbol($2.dcl_list[i].name, $2.dcl_list[i].type);
+	}
+	
+
 } BLK {
 	buffer->emit("RETRN");
 	//close scope
@@ -95,8 +103,15 @@ FDEFS:	FDEFS FUNC_API
 
 | FDEFS FUNC_API H_SEMI 
 {
+	cout << "FDEFS : FDEFS FUNC_API H_SEMI" << endl;
 	// Set function as unimplemented
 	current_function->setIsImplemented(false);
+
+	
+
+
+	/* */
+
 	buffer->addFunction(*current_function);
 	current_function->clearArgs();
 	cout << "Delete ST" << endl;
@@ -108,6 +123,8 @@ FDEFS:	FDEFS FUNC_API
 
 FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR        	
 {
+	cout << "FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR" << endl;
+	$$.dcl_list = $4.dcl_list;
 	//check if func name already exist in the symbol table pf the functions.
 
 	// if Yes, then check if the arguments match.
@@ -129,10 +146,10 @@ FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR
 		current_function->setReturnType(4);
 	}	
 
-	for (int i = 0 ; i < $4.dcl_list.size(); i++)
-	{
+	for (int i = 0 ; i < $4.dcl_list.size(); i++)	{
 		current_function->addArgument($4.dcl_list[i].type);
 	}
+
 	cout <<  "currentFunc name: " << $2.value << endl;
 	cout << "currentFunc args count: " << current_function->getArguments().size() << endl;
 	
@@ -163,12 +180,14 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
 
+	/*
 	cout << "About to add symbols" << endl;
 	for (unsigned int i = 0; i < $3.dcl_list.size(); i++){
 		symbol_table->addSymbol($3.dcl_list[i].name, $3.dcl_list[i].type);
 		cout << "symbol name: " << $3.dcl_list[i].name << endl;
 		cout << "symbol size: " << $3.dcl_list[i].type << endl;
 	}
+	*/
 
 	// DON'T ENABLE THIS LINE <------- BUG -------->
 	//$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
