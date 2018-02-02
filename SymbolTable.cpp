@@ -14,12 +14,14 @@ SymbolTable::~SymbolTable()
 void SymbolTable::startBlock() 
 {
 	level++;
+	cout << "startBlock - level: " << level << endl;
 	symbols.resize(level);
 }
 
 void SymbolTable::endBlock() 
 {
 	level--;
+	cout << "endBlock - level: " << level << endl;
 	symbols.pop_back();
 }
 
@@ -36,7 +38,10 @@ void SymbolTable::addSymbol(string name, unsigned int size)
 
 Symbol& SymbolTable::findSymbol(string name) 
 {
-	for(unsigned int i = level - 1; i >= 0; i--){
+	cout << "Try to find symbol" << endl;
+	cout << "level" << level << endl;
+	for(int i = level - 1; i >= 0; i--){
+		cout << "symbols[i].size: " << symbols[i].size() << endl;
 		auto r = std::find(symbols[i].begin(), symbols[i].end(), Symbol(name, 0, 0));
 		if (r != end(symbols[i]))
 			return *r;

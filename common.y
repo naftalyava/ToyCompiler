@@ -82,13 +82,14 @@ FDEFS:	FDEFS FUNC_API
 
 	// if there is no return to the current function (add return)
 	// Set current function as NULL
-	//symbol_table = new SymbolTable();
+	cout << "Allocate new ST" << endl;
+	symbol_table = new SymbolTable();
 	register_manager->startScope();
 
 } BLK {
 	buffer->emit("RETRN");
 	//close scope
-	//delete symbol_table;
+	delete symbol_table;
 	register_manager->endScope();
 }
 
@@ -98,6 +99,7 @@ FDEFS:	FDEFS FUNC_API
 	current_function->setIsImplemented(false);
 	buffer->addFunction(*current_function);
 	current_function->clearArgs();
+	cout << "Delete ST" << endl;
 	// Set current function as NULL
 }
 |
@@ -212,6 +214,7 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 BLK : H_OPM 
 {
 	$$.quad = buffer->getQuad();
+	symbol_table->startBlock();
 	// if current function has arguments and ST is empty ( we are in the bigger block) 
 
 	// add the current function dclList to the ST.
@@ -219,6 +222,7 @@ BLK : H_OPM
 	
 } STLIST H_CPM {
 	//add $2 dclList to the ST and check for sematic errors
+	symbol_table->endBlock();
 }								
 
 
@@ -536,13 +540,21 @@ EXP : EXP H_ADDOP EXP
 | H_ID
 {
 	cout << "EXP: H_ID start" << endl; 
-	Symbol &symbol = symbol_table->findSymbol($1.value);
-	cout << "symbol is found: " << $1.value << endl; 
-	cout << "symbol is size: " << symbol.getSize() << endl; 
-	
 	DCL_Node dcl_node;
-	dcl_node.type = symbol.getSize();
-	dcl_node.name = $1.value;
+	try{
+		Symbol &symbol = symbol_table->findSymbol($1.value);
+		cout << "symbol is found: " << $1.value << endl; 
+		cout << "symbol is size: " << symbol.getSize() << endl; 
+	
+		dcl_node.type = symbol.getSize();
+		dcl_node.name = $1.value;
+	}
+	catch (...)
+	{
+		cout << "Semantic error: <Symbol Not Found> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
+	
 	
 
 	try {
@@ -554,7 +566,8 @@ EXP : EXP H_ADDOP EXP
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
 		$$.type = symbol_table->findSymbol($1.value).getSize();
 	} catch (...) {
-
+		cout << "Semantic error: <Symbol Not Found> in line number <" << yylineno << ">" << endl;
+		exit(3);
 	}
 	$$.dcl_list.push_back(dcl_node);
 	cout << "EXP: H_ID end" << endl;
@@ -699,7 +712,22 @@ CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP
 	{
 		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
-}			
+}
+
+M : 
+{
+	$$.quad = buffer.nextQuad();
+}
+
+N :
+{
+	// update nextList
+	$$.nextList.insert(buffer.nextQuad());
+
+	// prepare space for jump
+	buffer.emit("UJUMP ");
+}
+			
 			
 
 %%
