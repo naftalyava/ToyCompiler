@@ -292,8 +292,6 @@ STLIST : STLIST M STMT
 	cout << "STLIST : STLIST M STMT" << endl;
 	
 	$$.next_list = $3.next_list;
-    ///////////////// DEBUG ONLY
-	$$.value = "STLIST";
 	for (auto element : $$.next_list)
 		cout << "$$next_list[i]" << element << endl;
 	$3.next_list.clear(); //will be taken care by backPatching the LIST in the next derevation
@@ -380,19 +378,68 @@ WRITE : H_WRITE H_OPR EXP H_CPR H_SEMI
 
 READ : H_READ H_OPR LVAL H_CPR H_SEMI
 {
-	
+	cout << "READ : H_READ H_OPR LVAL H_CPR H_SEMI" << endl;
+	if ($3.type == 0)
+	{
+		cout << "Semantic error: <Read target type void> in line number <" << yylineno << ">" << endl;
+		exit(3);	
+	}
+	int readReg = register_manager->getRegister();
+
+	buffer->emit("READI I" + to_string(readReg));
+
+	buffer->emit("STI" + to_string($3.type*8) + " I" + to_string(readReg) + " I" + to_string($3.reg) + " 0");
+
+
 }
 		
 
 
 ASSN : LVAL H_ASSIGN EXP H_SEMI
 {
-cout << "ASSN : LVAL H_ASSIGN EXP H_SEMIN" << endl;
+	cout << "ASSN : LVAL H_ASSIGN EXP H_SEMI" << endl;
+	if ($1.type != $3.type)
+	{
+		cout << "Semantic error: <Assignment type mismatch> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
+
+	$$.type = $1.type;
+	$$.reg = $1.reg;
+	buffer->emit("COPYI I" + to_string($1.reg) + " I" + to_string($3.reg));
 }
 		
-LVAL : H_ID 									
+LVAL : H_ID
 {
+	cout << "LVAL : H_ID start" << endl; 
+	DCL_Node dcl_node;
+	try{
+		Symbol &symbol = symbol_table->findSymbol($1.value);
+		cout << "symbol is found: " << $1.value << endl; 
+		cout << "symbol is size: " << symbol.getSize() << endl; 
+	
+		dcl_node.type = symbol.getSize();
+		dcl_node.name = $1.value;
+	}
+	catch (...)
+	{
+		cout << "Semantic error: <Symbol Not Found> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}	
 
+	try {
+		$$.reg = dcl_node.node_reg = register_manager->getRegister();
+		cout << "LVAL : H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
+		buffer->emit("LDI32 I" + to_string(dcl_node.node_reg) 
+						 + " I1 " 
+						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
+		$$.type = symbol_table->findSymbol($1.value).getSize();
+	} catch (...) {
+		cout << "Semantic error: <Symbol Not Found> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
+	$$.dcl_list.push_back(dcl_node);
+	cout << "LVAL : H_ID end" << endl;
 }
 
 
@@ -615,7 +662,6 @@ EXP : EXP H_ADDOP EXP
 	
 
 	try {
-		 //to indecate we have already been loaded to register (only for variables)
 		$$.reg = dcl_node.node_reg = register_manager->getRegister();
 		cout << "EXP: H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
 		buffer->emit("LDI32 I" + to_string(dcl_node.node_reg) 
