@@ -88,8 +88,8 @@ FDEFS:	FDEFS FUNC_API
 
 	cout << "adding function arguments to symbol_table" << endl;
 
-	for (int i = $2.dcl_list.size() - 1; i >= 0; i--){
-		cout << "adding: " << $2.dcl_list[i].name << endl; 
+	for (int i = 0; i < $2.dcl_list.size(); i++){
+		cout << "adding: " << $2.dcl_list[i].name << "size: " << $2.dcl_list[i].type << endl; 
 		symbol_table->addArgumentSymbol($2.dcl_list[i].name, $2.dcl_list[i].type);
 	}
 	

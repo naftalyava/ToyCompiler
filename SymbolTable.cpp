@@ -27,7 +27,7 @@ void SymbolTable::endBlock()
 
 void SymbolTable::addArgumentSymbol(string name, unsigned int size)
 {
-	cout << "Symbol: " << name << " offset: " << backwards_offset << " added" << endl;
+	cout << "Symbol: " << name << " size: " << size << " offset: " << backwards_offset << " added" << endl;
 	//fix offset
 	if (size == 1) {
 		symbols[level-1].push_back(Symbol(name, size, backwards_offset - 2));
@@ -41,7 +41,7 @@ void SymbolTable::addArgumentSymbol(string name, unsigned int size)
 
 void SymbolTable::addSymbol(string name, unsigned int size) 
 {
-	cout << "Symbol: " << name << " offset: " << offset << endl;
+	cout << "Symbol: " << name << " size: " << size << " offset: " << offset << endl;
 	symbols[level-1].push_back(Symbol(name, size, offset));
 	//fix offset
 	if (size == 1)
