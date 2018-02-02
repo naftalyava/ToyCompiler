@@ -9,17 +9,19 @@ Buffer::~Buffer(){}
 void Buffer::emit(string instruction)
 {
     code.push_back(instruction);
-    quad + 4;
 }
 
 void Buffer::backPatch(set<unsigned int> &lines, unsigned int &address)
 {
-
+	string addressString = to_string(address);
+	for (auto num : lines) {
+        code[num-1] += addressString;
+	}
 }
 
 unsigned int Buffer::nextQuad()
 {
-    return (code.size() + 2);
+    return (code.size() + 1);
 }
 
 unsigned int Buffer::getQuad()

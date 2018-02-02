@@ -458,9 +458,9 @@ BEXP : BEXP H_OR M BEXP
 
 	buffer->emit(relop + " I"+ to_string($$.reg) + " I" +to_string($1.reg) + " I" +to_string($3.reg));
 	$$.false_list.insert(buffer->nextQuad());
-	buffer->emit(branch);
+	buffer->emit(branch + " I" + to_string($$.reg) + " ");
 	$$.true_list.insert(buffer->nextQuad());
-	buffer->emit("UJUMP");
+	buffer->emit("UJUMP ");
 
 }
 
@@ -753,13 +753,18 @@ CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP
 
 M : 
 {
+	cout << "M - Marker" << endl;
 	$$.quad = buffer->nextQuad();
+	cout << "$$.quad" << $$.quad << endl;
+	
 }
 
 N :
 {
+	cout << "N - Marker" << endl;
 	// update next_list
 	$$.next_list.insert(buffer->nextQuad());
+	cout << "buffer->nextQuad()" << buffer->nextQuad() << endl;
 
 	// prepare space for jump
 	buffer->emit("UJUMP ");
