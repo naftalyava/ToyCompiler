@@ -498,19 +498,25 @@ CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT
 
 BEXP : BEXP H_OR M BEXP
 {
+	// Update BEXP false list and update the true list
+	buffer->backPatch($1.false_list , $3.quad);
+	MERGE($$.trueList, $1.true_list , $4.true_list);
+	$$.false_list = $4.false_list;
+}
+
+| BEXP H_AND M BEXP
+{
+	// Update BEXP false list and update the true list
 	buffer->backPatch($1.true_list , $3.quad);
 	$$.true_list = $4.true_list;
 	MERGE_LISTS($$.false_list, $1.false_list , $4.false_list);
-}
-
-| BEXP H_AND BEXP
-{
-	
 }	
 																								  
 | H_NOT BEXP
 {
-	
+	// Swap the ture/false lists.
+	$$.true_list = $2.false_list;
+	$$.false_list = $2.true_list;
 }
 																								  
 | EXP H_RELOP EXP
@@ -527,25 +533,44 @@ BEXP : BEXP H_OR M BEXP
 	string relop;
 	string branch;
 
+	//update the variables of the string with proper command
+	//"=="|"<>"|"<"|"<="|">"|">="
+	if (strcmp($2.value, "==") == 0)
+	{
+		relop.assign("SEQUI");
+		branch.assign("BREQZ");
+	}
+
+	if (strcmp($2.value, "<>") == 0)
+	{
+		relop.assign("SNEQI");
+		branch.assign("BREQZ");
+	}
+
 	if (strcmp($2.value, "<") == 0)
 	{
-		cout << "detected rel-op" << endl;
 		relop.assign("SLETI");
 		branch.assign("BREQZ");
-		cout << "detected rel-op" << endl;
-	}
-	int reg1 = $1.reg;
-	int reg3 = $3.reg;
-
-	if (reg1 == 0)
-	{
-		$1.dcl_list[0].node_reg;
 	}
 
-	if (reg3 == 0)
+	if (strcmp($2.value, "<=") == 0)
 	{
-		$3.dcl_list[0].node_reg;
+		relop.assign("SGRTI");
+		branch.assign("BNEQZ");
 	}
+
+	if (strcmp($2.value, ">") == 0)
+	{
+		relop.assign("SGRTI");
+		branch.assign("BREQZ");
+	}
+
+	if (strcmp($2.value, ">=") == 0)
+	{
+		relop.assign("SLETI");
+		branch.assign("BNEQZ");
+	}
+
 
 	buffer->emit(relop + " I"+ to_string($$.reg) + " I" +to_string($1.reg) + " I" +to_string($3.reg));
 	$$.false_list.insert(buffer->nextQuad());
