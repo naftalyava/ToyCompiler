@@ -683,9 +683,9 @@ EXP : EXP H_ADDOP EXP
 							 + to_string($4.reg) + " "+ to_string(32 - 8 * $2.type));
 			buffer->emit("SRAI I" + to_string($$.reg) + " I" 
 		                     + to_string($$.reg) + " " + to_string(32 - 8 * $2.type));
-			buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($$.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
+			buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($$.reg) + " " + to_string(-1+(int)pow(2, 8 * $2.type)));
 		} else {
-			buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($4.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
+			buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($4.reg) + " " + to_string(-1+(int)pow(2, 8 * $2.type)));
 		}
 			
 	}
@@ -702,15 +702,13 @@ EXP : EXP H_ADDOP EXP
 		} else {
 			if($2.type != 4){
 				buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($4.reg) + " " + to_string(-1+ (int)pow(2, 8 * $2.type)));
-			} else {
-				buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($4.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
 			}
 			
 		}
 			
 	}
 	else {
-
+		$$.reg = $4.reg;
 	}
 		
 }
@@ -754,6 +752,7 @@ EXP : EXP H_ADDOP EXP
 | H_NUM
 {
 	$$.is_const = true;
+	$$.type = 4;
 	$$.reg = register_manager->getRegister();
 	buffer->emit("COPYI I" + to_string($$.reg) 
 						   + " " + $1.value);
