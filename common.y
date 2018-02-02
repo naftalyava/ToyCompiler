@@ -374,7 +374,17 @@ RETURN : H_RETURN EXP H_SEMI
 
 WRITE : H_WRITE H_OPR EXP H_CPR H_SEMI
 {
-	buffer->emit("PRNTI I" + to_string($3.reg));
+	if ($3.type != 4) {
+		int tmp = register_manager->getRegister();
+		buffer->emit("SLAI I" + to_string(tmp) + " I" 
+							 + to_string($3.reg) + " "+ to_string(32 - 8 * $3.type));
+		buffer->emit("SRAI I" + to_string(tmp) + " I" 
+		                     + to_string(tmp) + " " + to_string(32 - 8 * $3.type));
+		buffer->emit("PRNTI I" + to_string(tmp));
+	} else {
+		buffer->emit("PRNTI I" + to_string($3.reg));
+	}
+	
 }
 		
 | H_WRITE H_OPR H_STR H_CPR H_SEMI
@@ -430,7 +440,7 @@ ASSN : LVAL H_ASSIGN EXP H_SEMI
 
 	$$.type = $1.type;
 	$$.reg = $1.reg;
-	buffer->emit("COPYI I" + to_string($1.reg) + " I" + to_string($3.reg));
+	buffer->emit("STI" + to_string($$.type * 8) + " I"  + to_string($3.reg) + " I" + to_string($1.reg) + " 0");
 }
 		
 LVAL : H_ID
@@ -454,7 +464,7 @@ LVAL : H_ID
 	try {
 		$$.reg = dcl_node.node_reg = register_manager->getRegister();
 		cout << "LVAL : H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
-		buffer->emit("LDI32 I" + to_string(dcl_node.node_reg) 
+		buffer->emit("ADD2I I" + to_string(dcl_node.node_reg) 
 						 + " I1 " 
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
 		$$.type = symbol_table->findSymbol($1.value).getSize();
@@ -469,13 +479,13 @@ LVAL : H_ID
 
 CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT
 {
+	set<int> merged;
 	cout << "CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT" << endl;
 	buffer->backPatch($2.true_list, $4.quad);
 	buffer->backPatch($2.false_list, $8.quad);
-	// //MERGE_LISTS all three to S list
-	set<int> tmp;
-	MERGE_LISTS(tmp, $5.next_list, $7.next_list);
-	MERGE_LISTS($$.next_list, tmp, $9.next_list);
+	
+	MERGE_LISTS(merged, $5.next_list, $7.next_list);
+	MERGE_LISTS($$.next_list, merged, $9.next_list);
 
 	for (auto element : $$.next_list)
 		cout << "$$next_list[i]" << element << endl;
@@ -500,7 +510,7 @@ BEXP : BEXP H_OR M BEXP
 {
 	// Update BEXP false list and update the true list
 	buffer->backPatch($1.false_list , $3.quad);
-	MERGE($$.trueList, $1.true_list , $4.true_list);
+	MERGE_LISTS($$.true_list, $1.true_list , $4.true_list);
 	$$.false_list = $4.false_list;
 }
 
@@ -663,26 +673,41 @@ EXP : EXP H_ADDOP EXP
 	$$.type = $2.type;
 
 	//cast from big to small
+
+
 	if ($4.type > $2.type) {
-		int tmp =  register_manager->getRegister();
-		buffer->emit("LDI" + to_string($2.type * 8) + " I" + to_string(tmp)
-						   + " I" + to_string($4.reg) + " 0");
 		$$.reg = register_manager->getRegister();
-		buffer->emit("SLAI I" + to_string($$.reg) + " I" 
-							 + to_string(tmp) + " "+ to_string(32 - 8 * $2.type));
-		buffer->emit("SRAI I" + to_string($$.reg) + " I" 
+		if (!$4.is_const){
+			
+			buffer->emit("SLAI I" + to_string($$.reg) + " I" 
+							 + to_string($4.reg) + " "+ to_string(32 - 8 * $2.type));
+			buffer->emit("SRAI I" + to_string($$.reg) + " I" 
 		                     + to_string($$.reg) + " " + to_string(32 - 8 * $2.type));
-		buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($$.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
+			buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($$.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
+		} else {
+			buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($4.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
+		}
+			
 	}
 	else if ($4.type < $2.type)	{
-		int tmp =  register_manager->getRegister();
-		buffer->emit("LDI" + to_string($2.type * 8) + " I" + to_string(tmp)
-						   + " I" + to_string($4.reg) + " 0");
 		$$.reg = register_manager->getRegister();
-		buffer->emit("SLAI I" + to_string($$.reg) + " I" 
-							 + to_string(tmp) + " "+ to_string(32 - 8 * $4.type));
-		buffer->emit("SRAI I" + to_string($$.reg) + " I" 
+		if (!$4.is_const){
+			buffer->emit("SLAI I" + to_string($$.reg) + " I" 
+							 + to_string($4.reg) + " "+ to_string(32 - 8 * $4.type));
+			buffer->emit("SRAI I" + to_string($$.reg) + " I" 
 		                     + to_string($$.reg) + " " + to_string(32 - 8 * $4.type));
+			if($2.type != 4){
+				buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($$.reg) + " " + to_string(-1+ (int)pow(2, 8 * $2.type)));
+				}
+		} else {
+			if($2.type != 4){
+				buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($4.reg) + " " + to_string(-1+ (int)pow(2, 8 * $2.type)));
+			} else {
+				buffer->emit("ANDI I" + to_string($$.reg) + " I" + to_string($4.reg) + " " + to_string((int)pow(2, 8 * $2.type)));
+			}
+			
+		}
+			
 	}
 	else {
 
@@ -711,12 +736,13 @@ EXP : EXP H_ADDOP EXP
 	
 
 	try {
+		$$.type = symbol_table->findSymbol($1.value).getSize();
 		$$.reg = dcl_node.node_reg = register_manager->getRegister();
 		cout << "EXP: H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
-		buffer->emit("LDI32 I" + to_string(dcl_node.node_reg) 
+		buffer->emit("LDI" + to_string($$.type * 8)+ " I" + to_string(dcl_node.node_reg) 
 						 + " I1 " 
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
-		$$.type = symbol_table->findSymbol($1.value).getSize();
+		
 	} catch (...) {
 		cout << "Semantic error: <Symbol Not Found> in line number <" << yylineno << ">" << endl;
 		exit(3);
@@ -727,6 +753,7 @@ EXP : EXP H_ADDOP EXP
 
 | H_NUM
 {
+	$$.is_const = true;
 	$$.reg = register_manager->getRegister();
 	buffer->emit("COPYI I" + to_string($$.reg) 
 						   + " " + $1.value);

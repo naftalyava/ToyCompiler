@@ -34,6 +34,7 @@ typedef struct {
 typedef struct{
     char*	value;
     unsigned int type;
+    bool is_const;
     unsigned int quad;
     unsigned int reg;
     vector<DCL_Node> dcl_list;
