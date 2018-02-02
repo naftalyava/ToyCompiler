@@ -12,3 +12,13 @@ TODO:
 2. Implement Buffer.h.
 3. Understand markers and backpatching
 4. We should start work on common.y file ASAP.
+
+
+Last stage:
+* RELOPS : != , == , < , >
+* BEXP: NOT, AND
+* Return value type
+* Error messages
+* Clean code from extra prints
+* Documentation
+* Bugs :)
