@@ -1,0 +1,19 @@
+int32 foo()
+{
+    a: int32;
+    b: int32;
+
+    a = a + b;
+}
+
+int32 foo3()
+{
+    d, e: int32;
+
+    {
+        d: int32;
+        d = d + e;
+    }
+
+    d = d + e;
+}

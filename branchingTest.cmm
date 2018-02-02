@@ -1,0 +1,10 @@
+int32 foo()
+{
+    a,b : int32;
+    a = 0;
+    b = 1;
+
+    if a < b then write("a");
+    else write("b");
+
+}
