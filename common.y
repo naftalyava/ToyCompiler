@@ -329,13 +329,17 @@ STLIST : STLIST M STMT
 STMT :  DCL H_SEMI
 {
 	for (int i= 0; i<$1.dcl_list.size(); i++){
+		/*
 		if ($1.dcl_list[i].type == 1){
-			symbol_table->addSymbol($1.dcl_list[i].name, 2);
+			symbol_table->addSymbol($1.dcl_list[i].name, 1);
 			buffer->emit("ADD2I I2 I2 " + to_string(2));
 		} else {
 			symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
 			buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
 		}
+		*/
+		symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
+		buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
 	}
 }
 
@@ -417,6 +421,7 @@ READ : H_READ H_OPR LVAL H_CPR H_SEMI
 ASSN : LVAL H_ASSIGN EXP H_SEMI
 {
 	cout << "ASSN : LVAL H_ASSIGN EXP H_SEMI" << endl;
+	cout << "$1.type: " << $1.type << " $3.type: " << $3.type << endl;
 	if ($1.type != $3.type)
 	{
 		cout << "Semantic error: <Assignment type mismatch> in line number <" << yylineno << ">" << endl;
@@ -704,7 +709,7 @@ EXP : EXP H_ADDOP EXP
 		
 | CALL
 {
-
+	$$.type = $1.type;
 }
 
 
@@ -720,7 +725,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 
 	vector<unsigned int> args = func.getArguments();
 	cout << "get arguments done" << endl;
-	
+	$$.type = func.getReturnType();
 
 	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
 	cout << "args.size(): " << args.size() << endl;
@@ -728,8 +733,12 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 		cout << "Semantic error: <Argument Number Mismatch> in line number <" << yylineno << ">" << endl;
 				exit(3);
 	} else {
+		cout << "CHECK FUNCTION SIGNATURE" << endl;
 		for (int i=0; i < args.size(); i++){
 			if (args[i] != $3.dcl_list[i].type){
+				cout << "args[i]: " << args[i] << endl;
+				cout << "$3.dcl_list[i].type: " << $3.dcl_list[i].type << endl;
+
 				cout << "Semantic error: <Argument Type Mismatch> in line number <" << yylineno << ">" << endl;
 				exit(3);
 			}
@@ -740,7 +749,8 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 			cout << "call lines was updated for:" << endl;
 			cout << "func name: " << func.getName() << " line: " << buffer->getQuad() << endl;
 		}
-			
+
+	
 	}
  
 
@@ -805,9 +815,10 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 CALL_ARGS : CALL_ARGLIST				
 {
 	cout << "CALL_ARGS : CALL_ARGLIST" << endl;
-	cout << "$$.dcl_list size - 1: " << $$.dcl_list.size() <<endl;
 	$$.dcl_list = $1.dcl_list;
-	cout << "$$.dcl_list size - 2: " << $$.dcl_list.size() <<endl;
+	for (int i = 0 ; i < $$.dcl_list.size(); i++){
+		cout << "name:type " << $$.dcl_list[i].name << " : " << $$.dcl_list[i].type << endl;
+	}
 }
 |
 {	
@@ -820,11 +831,13 @@ CALL_ARGS : CALL_ARGLIST
 CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP			
 {
 	cout << "CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP" << endl;
-	cout << "before insert $$.dcl_list.size(): " << $$.dcl_list.size() << endl;
-	cout << "$1.dcl_list.size(): " << $1.dcl_list.size() << endl;
-	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
+	for (int i = 0 ; i < $3.dcl_list.size(); i++){
+		cout << "name:type " << $3.dcl_list[i].name << " : " << $3.dcl_list[i].type << endl;
+	}
 
 	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
+	for (auto element: $$.dcl_list)
+		cout << "name:type " << element.name << " : " << element.type << endl;
 }
 | EXP						
 {

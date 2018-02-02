@@ -2,23 +2,18 @@
 <unimplemented>
 <implemented> main,1
 </header>
-ADD2I I2 I2 4 # a @ 0
-ADD2I I2 I2 1 # b @ 4
-
-# read(a)
-ADD2I I3 I1 0 # I3 <- adress(a)
-READI I4 	  # I4 <- input
-STI32 I4 I3 0 # adress(a) <- i4
-
-# read(b)
+ADD2I I2 I2 4
+ADD2I I2 I2 1
+ADD2I I3 I1 0
+READI I4
+STI32 I4 I3 0
 ADD2I I5 I1 4
 READI I6
 STI8 I6 I5 0
-
-LDI32 I7 I1 0 # i7 <- a
-LDI8 I8 I1 4  # i8 <- b
-SLAI I9 I8 24 # start casting to 32
-SRAI I9 I9 24 # finish casting to 32
+LDI32 I7 I1 0
+LDI8 I8 I1 4
+SLAI I9 I8 24
+SRAI I9 I9 24
 SLETI  I10 I7 I9
 BREQZ I10 19
 UJUMP 16
@@ -47,8 +42,6 @@ LDI16 I20 I1 6
 SLAI I21 I20 16
 SRAI I21 I21 16
 PRNTI I21
-
-# write("\nat main BLK a=");
 PRNTC 10
 PRNTC 97
 PRNTC 116
@@ -64,11 +57,7 @@ PRNTC 75
 PRNTC 32
 PRNTC 97
 PRNTC 61
-
-# write(a)
 LDI32 I22 I1 0
 PRNTI I22
-
-# write("\n");
 PRNTC 10
 RETRN
