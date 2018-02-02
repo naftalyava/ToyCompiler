@@ -221,8 +221,9 @@ BLK : H_OPM
 
 	
 } STLIST M H_CPM {
+	cout << "BLK: } STLIST M H_CPM {" << endl;
 
-	buffer->backPatch($2.next_list , $3.quad);
+	buffer->backPatch($3.next_list , $4.quad);
 	//add $2 dclList to the ST and check for sematic errors
 	symbol_table->endBlock();
 }								
@@ -288,8 +289,19 @@ TYPE : H_INT8
 
 STLIST : STLIST M STMT
 {
+	cout << "STLIST : STLIST M STMT" << endl;
+	
 	$$.next_list = $3.next_list;
+    ///////////////// DEBUG ONLY
+	$$.value = "STLIST";
+	for (auto element : $$.next_list)
+		cout << "$$next_list[i]" << element << endl;
 	$3.next_list.clear(); //will be taken care by backPatching the LIST in the next derevation
+
+	
+	for (auto element : $$.next_list)
+		cout << "$$next_list[i]" << element << endl;
+
 	buffer->backPatch($1.next_list, $2.quad);
 }
 
@@ -315,7 +327,11 @@ STMT :  DCL H_SEMI
 | EXP H_SEMI{}
 | CNTRL
 {
+	cout << "STMT: CNTRL" << endl;
 	$$.next_list = $1.next_list;
+
+	for (auto element : $$.next_list)
+		cout << "$$next_list[i] " << element << endl;
 }
 | READ{}		
 | WRITE{}		
@@ -382,18 +398,22 @@ LVAL : H_ID
 
 CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT
 {
+	cout << "CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT" << endl;
 	buffer->backPatch($2.true_list, $4.quad);
 	buffer->backPatch($2.false_list, $8.quad);
-	// //MERGE all three to S list
+	// //MERGE_LISTS all three to S list
 	set<int> tmp;
-	//MERGE(tmp, $5.next_list, $7.next_list);
-	//MERGE($$.next_list, tmp, $9.next_list);
+	MERGE_LISTS(tmp, $5.next_list, $7.next_list);
+	MERGE_LISTS($$.next_list, tmp, $9.next_list);
+
+	for (auto element : $$.next_list)
+		cout << "$$next_list[i]" << element << endl;
 }
 																					
 | H_IF BEXP H_THEN M STMT
 {
 	buffer->backPatch($2.true_list , $4.quad);
-	//MERGE($$.next_list, $2.false_list, $5.next_list);
+	MERGE_LISTS($$.next_list, $2.false_list, $5.next_list);
 }
 
 | H_WHILE M BEXP H_DO M STMT
@@ -409,7 +429,7 @@ BEXP : BEXP H_OR M BEXP
 {
 	buffer->backPatch($1.true_list , $3.quad);
 	$$.true_list = $4.true_list;
-	//MERGE($$.false_list, $1.false_list , $4.false_list);
+	MERGE_LISTS($$.false_list, $1.false_list , $4.false_list);
 }
 
 | BEXP H_AND BEXP

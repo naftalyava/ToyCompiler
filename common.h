@@ -16,6 +16,10 @@
 /*
 	Definitions of data structure to share data between lex and bison
 */
+#define MERGE_LISTS(Father, son1,son2) do{ \
+Father.insert(son1.begin(),son1.end()); \
+Father.insert(son2.begin(),son2.end()); \
+}	while(0)
 
 typedef enum {INT8, INT16, INT32, VOID, INVALID} TokenType;
 
