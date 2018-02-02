@@ -29,13 +29,15 @@ void SymbolTable::addArgumentSymbol(string name, unsigned int size)
 {
 	cout << "Symbol: " << name << " size: " << size << " offset: " << backwards_offset << " added" << endl;
 	//fix offset
+	/*
 	if (size == 1) {
 		symbols[level-1].push_back(Symbol(name, size, backwards_offset - 2));
 		backwards_offset -= 2;
 	} else {
+		*/
 		symbols[level-1].push_back(Symbol(name, size, backwards_offset - size));
 		backwards_offset -= size;
-	}
+	//}
 		
 }
 
@@ -44,9 +46,11 @@ void SymbolTable::addSymbol(string name, unsigned int size)
 	cout << "Symbol: " << name << " size: " << size << " offset: " << offset << endl;
 	symbols[level-1].push_back(Symbol(name, size, offset));
 	//fix offset
+	/*
 	if (size == 1)
 		offset += 2;
 	else
+	*/
 		offset += size;
 }
 

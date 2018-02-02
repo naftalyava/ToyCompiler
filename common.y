@@ -814,10 +814,15 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 		stack_counter += 4;
 	}
 
+	int tmp = 0;
+	for (int i = $3.dcl_list.size()-1 ; i >= 0; i--)
+	{
+		tmp += (int)$3.dcl_list[i].type;
+	}
+
 	//Make room for Return value And Arguments
 	stack_counter += 4;
-	int tmp = stack_counter + 4*($3.dcl_list.size());
-	buffer->emit("ADD2I I2 I2 " + to_string(tmp));
+	buffer->emit("ADD2I I2 I2 " + to_string(stack_counter + tmp));
 	
 
 	//Move FP
@@ -825,10 +830,13 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 
 	// Push call arguments
 	cout << "Push call arguments to the stack" << endl;
+	int rev_counter = -4;
 	for (int i = $3.dcl_list.size()-1 ; i >= 0; i--)
 	{
-		buffer->emit("STI32 I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(-4 - i*4)); // Don't know why -8!!!!!
-		stack_counter += 4;
+		//cout << "PRIIIIINT: " << rev_counter - (int)$3.dcl_list[i].type << endl;
+		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter - (int)$3.dcl_list[i].type)); // Don't know why -8!!!!!
+		rev_counter -= (int)$3.dcl_list[i].type;
+		stack_counter += (int)$3.dcl_list[i].type;
 	}
 
 
@@ -859,6 +867,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 
 		buffer->emit("LDI32 I" + to_string(i) + " I2 " + to_string(i*4));
 	}
+
 
 }
 
