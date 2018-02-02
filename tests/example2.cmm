@@ -1,0 +1,20 @@
+int32 power (c: int16, m:int8)
+{
+    d:int32;
+    if m==(int8)0 then return (int32)1;
+    if m==(int8)1 then return (int32)c;
+    d=power(c,m-(int8)1);
+    return d*(int32)c;
+}
+
+void main()
+{
+    a:int16;
+    b:int32;
+    n:int8;
+
+    read(a);
+    read(n);
+    b = power (a,n);
+    write(b);
+}

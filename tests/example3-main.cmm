@@ -1,0 +1,11 @@
+int32 foo2();
+int16 foo(c: int32);
+
+void main() {
+    a:int8;
+    b: int32;
+
+	a =(int8)2;
+    b = (int32)foo((int32)a );
+	write(b);
+}
