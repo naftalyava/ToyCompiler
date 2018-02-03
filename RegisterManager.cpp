@@ -15,7 +15,7 @@ int RegisterManager::getRegister(){ //get next register
 
 	reg = scope[scope.size()-1];
 	++scope[scope.size()-1];
-	cout << "reg: " << reg << endl;
+	//cout << "reg: " << reg << endl;
 	return reg;
 }
 
@@ -32,7 +32,7 @@ void RegisterManager::setRegistersCount(int toSet){
 
 void RegisterManager::startScope()
 {
-	cout << "startScope" << endl;
+	//cout << "startScope" << endl;
 	scope.push_back(3);
 }
 
@@ -43,7 +43,7 @@ void RegisterManager::endScope()
 		//ERROR
 	}
 	else {
-		cout << "endScope" << endl;
+		//cout << "endScope" << endl;
 		scope.pop_back();
 	}
 }

@@ -14,20 +14,20 @@ SymbolTable::~SymbolTable()
 void SymbolTable::startBlock() 
 {
 	level++;
-	cout << "startBlock - level: " << level << endl;
+	//cout << "startBlock - level: " << level << endl;
 	symbols.resize(level);
 }
 
 void SymbolTable::endBlock() 
 {
 	level--;
-	cout << "endBlock - level: " << level << endl;
+	//cout << "endBlock - level: " << level << endl;
 	symbols.pop_back();
 }
 
 void SymbolTable::addArgumentSymbol(string name, unsigned int size)
 {
-	cout << "Symbol: " << name << " size: " << size << " offset: " << backwards_offset << " added" << endl;
+	//cout << "Symbol: " << name << " size: " << size << " offset: " << backwards_offset << " added" << endl;
 		/* START */
 	if (size == 1){
 		backwards_offset -=1;
@@ -52,7 +52,7 @@ void SymbolTable::addArgumentSymbol(string name, unsigned int size)
 
 int SymbolTable::addSymbol(string name, unsigned int size) 
 {
-	cout << "Symbol: " << name << " size: " << size << " offset: " << offset << endl;
+	//cout << "Symbol: " << name << " size: " << size << " offset: " << offset << endl;
 	
 	/* START */
 	int tmp = 0;
@@ -74,6 +74,11 @@ int SymbolTable::addSymbol(string name, unsigned int size)
 	}
 
 	/* END */
+	for (int i=0; i < symbols[level-1].size(); i++){
+		if (symbols[level-1][i].getName() == name){
+			throw exception();
+		}
+	}
 	symbols[level-1].push_back(Symbol(name, size, offset));
 	offset += size;
 	return tmp + size;
@@ -81,11 +86,11 @@ int SymbolTable::addSymbol(string name, unsigned int size)
 
 Symbol& SymbolTable::findSymbol(string name) 
 {
-	cout << "Try to find symbol: " << name << endl;
+	//cout << "Try to find symbol: " << name << endl;
 
-	cout << "level" << level << endl;
+	//cout << "level" << level << endl;
 	for(int i = level - 1; i >= 0; i--){
-		cout << "symbols[i].size: " << symbols[i].size() << endl;
+		//cout << "symbols[i].size: " << symbols[i].size() << endl;
 		auto r = std::find(symbols[i].begin(), symbols[i].end(), Symbol(name, 0, 0));
 		if (r != end(symbols[i]))
 			return *r;

@@ -63,6 +63,25 @@ void Buffer::bufferToRiski(string filename)
 
 void Buffer::addFunction(Function func)
 {
+    for (int i=0; i < implemented.size(); i++){
+        if (implemented[i].getName() == func.getName()){
+            throw exception();
+        }
+    }
+    for (int i=0; i < unimplemented.size(); i++){
+        if (unimplemented[i].getName() == func.getName()){
+
+            if ( (func == unimplemented[i]) && func.getIsImplemented()){
+                break;
+            }
+
+
+            throw exception();
+        }
+    }
+
+
+
     if (func.getIsImplemented())
         implemented.push_back(func);
     else
@@ -113,20 +132,22 @@ void Buffer::writeHeader(vector<Function> implemented, vector<Function> unimplem
 
 Function& Buffer::findFunction(string name)
 {
-    cout << "look in implemented" << endl;
+    //cout << "look in implemented" << endl;
     for (int i=0; i < implemented.size(); i++){
         if (implemented[i].getName() == name){
-            cout << "function: " << name << " is found" << endl;
+            //cout << "function: " << name << " is found" << endl;
             return implemented[i];
         }
     }
 
-    cout << "look in unimplemented" << endl;
+    //cout << "look in unimplemented" << endl;
     for (int i=0; i < unimplemented.size(); i++){
         if (unimplemented[i].getName() == name){
-            cout << "function: " << name << " is found" << endl;
+            //cout << "function: " << name << " is found" << endl;
             return unimplemented[i];
         }
     }
+
+    throw exception();
 
 }

@@ -76,7 +76,13 @@ FDEFS:	FDEFS FUNC_API
 	
 
 	// Add function to function manager
-	buffer->addFunction(*current_function);
+	try {
+		buffer->addFunction(*current_function);
+	} catch (...) {
+		cout << "Semantic error: <function multiple definition> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
+	
 	current_function->clearArgs();
 
 
@@ -84,10 +90,10 @@ FDEFS:	FDEFS FUNC_API
 	// Set current function as NULL
 	register_manager->startScope();
 
-	cout << "adding function arguments to symbol_table" << endl;
+	//cout << "adding function arguments to symbol_table" << endl;
 
 	for (int i = 0; i < $2.dcl_list.size(); i++){
-		cout << "adding: " << $2.dcl_list[i].name << " size: " << $2.dcl_list[i].type << endl; 
+		//cout << "adding: " << $2.dcl_list[i].name << " size: " << $2.dcl_list[i].type << endl; 
 		symbol_table->addArgumentSymbol($2.dcl_list[i].name, $2.dcl_list[i].type);
 	}
 	
@@ -98,14 +104,14 @@ FDEFS:	FDEFS FUNC_API
 	delete symbol_table;
 	register_manager->endScope();
 	
-	cout << "Re-Allocate new ST" << endl;
+	//cout << "Re-Allocate new ST" << endl;
 	symbol_table = new SymbolTable();
 
 }
 
 | FDEFS FUNC_API H_SEMI 
 {
-	cout << "FDEFS : FDEFS FUNC_API H_SEMI" << endl;
+	//cout << "FDEFS : FDEFS FUNC_API H_SEMI" << endl;
 	// Set function as unimplemented
 	current_function->setIsImplemented(false);
 
@@ -114,7 +120,13 @@ FDEFS:	FDEFS FUNC_API
 
 	/* */
 
-	buffer->addFunction(*current_function);
+	try {
+		buffer->addFunction(*current_function);
+	} catch (...) {
+		cout << "Semantic error: <function multiple definition> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
+
 	current_function->clearArgs();
 	// Set current function as NULL
 }
@@ -124,7 +136,7 @@ FDEFS:	FDEFS FUNC_API
 
 FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR        	
 {
-	cout << "FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR" << endl;
+	//cout << "FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR" << endl;
 	$$.dcl_list = $4.dcl_list;
 	//check if func name already exist in the symbol table pf the functions.
 
@@ -152,9 +164,9 @@ FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR
 		current_function->addArgument($4.dcl_list[i].type);
 	}
 
-	cout <<  "currentFunc name: " << $2.value << endl;
-	cout << "currentFunc args count: " << current_function->getArguments().size() << endl;
-	cout << "current function return type: " << current_function->getReturnType() << endl;
+	//cout <<  "currentFunc name: " << $2.value << endl;
+	//cout << "currentFunc args count: " << current_function->getArguments().size() << endl;
+	//cout << "current function return type: " << current_function->getReturnType() << endl;
 	
 }
 
@@ -171,30 +183,17 @@ FUNC_ARGS : FUNC_ARGLIST
 
 FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL 		
 {
-	cout << "FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL " << endl;
+	//cout << "FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL " << endl;
 	for (int i = 0; i < $$.dcl_list.size(); i++)
 	{
-		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+		//cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
-	cout << "----------------------" << endl;
+	//cout << "----------------------" << endl;
 	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
 	for (int i = 0; i < $$.dcl_list.size(); i++)
 	{
-		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+		//cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
-
-	/*
-	cout << "About to add symbols" << endl;
-	for (unsigned int i = 0; i < $3.dcl_list.size(); i++){
-		symbol_table->addSymbol($3.dcl_list[i].name, $3.dcl_list[i].type);
-		cout << "symbol name: " << $3.dcl_list[i].name << endl;
-		cout << "symbol size: " << $3.dcl_list[i].type << endl;
-	}
-	*/
-
-	// DON'T ENABLE THIS LINE <------- BUG -------->
-	//$$.dcl_list.insert($$.dcl_list.end(), $1.dcl_list.begin(), $1.dcl_list.end());
-	cout << "Symbols were added" << endl;
 
 	// check semantic error of $3 (No Void)
 
@@ -207,18 +206,18 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 | DCL
 {
 	// check semantic error (No Void)
-	cout << "FUNC_ARGLIST :	DCL " << endl;
+	//cout << "FUNC_ARGLIST :	DCL " << endl;
 	// update the $$ dclList according to $1
-	cout << "$1.dcl_list size: " <<  $1.dcl_list.size() << endl;
+	//cout << "$1.dcl_list size: " <<  $1.dcl_list.size() << endl;
 	for (int i = 0; i < $1.dcl_list.size(); i++)
 	{
-		cout << "$1.dcl_list[i]: " <<  $1.dcl_list[i].name << endl;
+		//cout << "$1.dcl_list[i]: " <<  $1.dcl_list[i].name << endl;
 	}
 
-	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
+	//cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
 	for (int i = 0; i < $$.dcl_list.size(); i++)
 	{
-		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+		//cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
 	/*
 	cout << "About to add symbols" << endl;
@@ -243,7 +242,7 @@ BLK : H_OPM
 
 	
 } STLIST M H_CPM {
-	cout << "BLK: } STLIST M H_CPM {" << endl;
+	//cout << "BLK: } STLIST M H_CPM {" << endl;
 
 	buffer->backPatch($3.next_list , $4.quad);
 	//add $2 dclList to the ST and check for sematic errors
@@ -253,17 +252,21 @@ BLK : H_OPM
 
 DCL : H_ID H_COLON TYPE
 {
-	cout << "DCL : H_ID H_COLON TYPE" << endl;
+	//cout << "DCL : H_ID H_COLON TYPE" << endl;
 	// update the $$ dclList with the given id:type
+	if ($3.type == 0){
+		cout << "Semantic error: <cannot declare void type> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
 	DCL_Node node = {$1.value, $3.type, yylineno};
 	$$.dcl_list.push_back(node);
-	cout << "$1.value: " << $1.value << endl;
+	//cout << "$1.value: " << $1.value << endl;
 	// Update $$ type according to $3 type / value.
 	$$.type = $3.type;
-	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
+	//cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
 	for (int i = 0; i < $$.dcl_list.size(); i++)
 	{
-		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+		//cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
 	
 	
@@ -271,18 +274,18 @@ DCL : H_ID H_COLON TYPE
 		
 | H_ID H_COMMA DCL
 {
-	cout << "DCL : H_ID H_COMMA DCL" << endl;
+	//cout << "DCL : H_ID H_COMMA DCL" << endl;
 	// add id to the $$ dclList
 	DCL_Node node = {$1.value, $3.type, yylineno};
 	$$.dcl_list.push_back(node);
 	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
-	cout << "$1.value: " << $1.value << endl;
+	//cout << "$1.value: " << $1.value << endl;
 	// Set the $$ according to the $3 type.
 	$$.type = $3.type;
-	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
+	//cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
 	for (int i = 0; i < $$.dcl_list.size(); i++)
 	{
-		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+		//cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
 	// concat the $3 dclList to the $$ dclList
 	//$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
@@ -292,41 +295,44 @@ DCL : H_ID H_COLON TYPE
 
 TYPE : H_INT8
 {
-	cout << "TYPE : H_INT8 [1]" << endl;
+	//cout << "TYPE : H_INT8 [1]" << endl;
 	//cout << "$1.value: " << $1.value << " $1.type: " << $1.type << endl;
 	$$.type = 1;
 }
 
 | H_INT16
 {
-	cout << "TYPE : H_INT8 [2]" << endl;
+	//cout << "TYPE : H_INT8 [2]" << endl;
 	$$.type = 2;
 }
 | H_INT32
 {
-	cout << "TYPE : H_INT8 [4]" << endl;
+	//cout << "TYPE : H_INT8 [4]" << endl;
 	$$.type = 4;
 }
 | H_VOID
 {
-	cout << "TYPE : H_INT8: [0]" <<  endl;
+	//cout << "TYPE : H_INT8: [0]" <<  endl;
 	$$.type = 0;
 }
 
 
 STLIST : STLIST M STMT
 {
-	cout << "STLIST : STLIST M STMT" << endl;
+	//cout << "STLIST : STLIST M STMT" << endl;
 	
 	$$.next_list = $3.next_list;
-	for (auto element : $$.next_list)
+	/*
+	for (auto element : $$.next_list){
 		cout << "$$next_list[i]" << element << endl;
+	}
+	*/
 	$3.next_list.clear(); //will be taken care by backPatching the LIST in the next derevation
 
-	
+	/*
 	for (auto element : $$.next_list)
 		cout << "$$next_list[i]" << element << endl;
-
+	*/
 	buffer->backPatch($1.next_list, $2.quad);
 }
 
@@ -337,8 +343,14 @@ STLIST : STLIST M STMT
 STMT :  DCL H_SEMI
 {
 	for (int i= 0; i<$1.dcl_list.size(); i++){
-		buffer->emit("ADD2I I2 I2 " + 
+		try {
+			buffer->emit("ADD2I I2 I2 " + 
 			to_string(symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type)));
+		} catch (...) {
+			cout << "Semantic error: <variable redeclaration> in line number <" << yylineno << ">" << endl;
+			exit(3);
+		}
+		
 	}
 }
 
@@ -347,11 +359,13 @@ STMT :  DCL H_SEMI
 | EXP H_SEMI{}
 | CNTRL
 {
-	cout << "STMT: CNTRL" << endl;
+	//cout << "STMT: CNTRL" << endl;
 	$$.next_list = $1.next_list;
 
+	/*
 	for (auto element : $$.next_list)
 		cout << "$$next_list[i] " << element << endl;
+	*/
 }
 | READ{}		
 | WRITE{}		
@@ -389,7 +403,7 @@ WRITE : H_WRITE H_OPR EXP H_CPR H_SEMI
 | H_WRITE H_OPR H_STR H_CPR H_SEMI
 {
 	unsigned tmp;
-	cout << "H_STR: " << $3.value << endl;
+	//cout << "H_STR: " << $3.value << endl;
 	for (int i=0; i < strlen($3.value); i++){
 		if ($3.value[i] == '\\' && $3.value[i+1] == 'n'){
 			tmp = '\n';
@@ -410,7 +424,7 @@ WRITE : H_WRITE H_OPR EXP H_CPR H_SEMI
 
 READ : H_READ H_OPR LVAL H_CPR H_SEMI
 {
-	cout << "READ : H_READ H_OPR LVAL H_CPR H_SEMI" << endl;
+	//cout << "READ : H_READ H_OPR LVAL H_CPR H_SEMI" << endl;
 	if ($3.type == 0)
 	{
 		cout << "Semantic error: <Read target type void> in line number <" << yylineno << ">" << endl;
@@ -429,9 +443,11 @@ READ : H_READ H_OPR LVAL H_CPR H_SEMI
 
 ASSN : LVAL H_ASSIGN EXP H_SEMI
 {
+	/*
 	cout << "ASSN : LVAL H_ASSIGN EXP H_SEMI" << endl;
 	cout << "$1.type: " << $1.type << " $3.type: " << $3.type << endl;
 	cout << "$1.reg: " << $1.reg << " $3.reg: " << $3.reg << endl;
+	*/
 	if ($1.type != $3.type)
 	{
 		cout << "Semantic error: <Assignment type mismatch> in line number <" << yylineno << ">" << endl;
@@ -445,12 +461,12 @@ ASSN : LVAL H_ASSIGN EXP H_SEMI
 		
 LVAL : H_ID
 {
-	cout << "LVAL : H_ID start" << endl; 
+	//cout << "LVAL : H_ID start" << endl; 
 	DCL_Node dcl_node;
 	try{
 		Symbol &symbol = symbol_table->findSymbol($1.value);
-		cout << "symbol is found: " << $1.value << endl; 
-		cout << "symbol is size: " << symbol.getSize() << endl; 
+		//cout << "symbol is found: " << $1.value << endl; 
+		//cout << "symbol is size: " << symbol.getSize() << endl; 
 	
 		dcl_node.type = symbol.getSize();
 		dcl_node.name = $1.value;
@@ -464,7 +480,7 @@ LVAL : H_ID
 
 	try {
 		$$.reg = dcl_node.node_reg = register_manager->getRegister();
-		cout << "LVAL : H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
+		//cout << "LVAL : H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
 		buffer->emit("ADD2I I" + to_string(dcl_node.node_reg) 
 						 + " I1 " 
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
@@ -474,22 +490,24 @@ LVAL : H_ID
 		exit(3);
 	}
 	$$.dcl_list.push_back(dcl_node);
-	cout << "LVAL : H_ID end" << endl;
+	//cout << "LVAL : H_ID end" << endl;
 }
 
 
 CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT
 {
 	set<int> merged;
-	cout << "CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT" << endl;
+	//cout << "CNTRL : H_IF BEXP H_THEN M STMT H_ELSE N M STMT" << endl;
 	buffer->backPatch($2.true_list, $4.quad);
 	buffer->backPatch($2.false_list, $8.quad);
 	
 	MERGE_LISTS(merged, $5.next_list, $7.next_list);
 	MERGE_LISTS($$.next_list, merged, $9.next_list);
-
+	
+	/*
 	for (auto element : $$.next_list)
 		cout << "$$next_list[i]" << element << endl;
+	*/
 }
 																					
 | H_IF BEXP H_THEN M STMT
@@ -532,11 +550,11 @@ BEXP : BEXP H_OR M BEXP
 																								  
 | EXP H_RELOP EXP
 {
-	cout << "BEXP: EXP H_RELOP EXP" << endl;
-	cout << "RELOP: " << $2.value << endl;
+	//cout << "BEXP: EXP H_RELOP EXP" << endl;
+	//cout << "RELOP: " << $2.value << endl;
 	if ($1.type != $3.type)
 	{
-		cout << "Sssssssssssssssssssss" << endl;
+		cout << "Semantic error: <incopatible types in RELOP operation> in line number <" << yylineno << ">" << endl;
 		exit(3);
 	}
 
@@ -600,11 +618,11 @@ BEXP : BEXP H_OR M BEXP
 																					
 EXP : EXP H_ADDOP EXP
 {
-	cout << "EXP : EXP H_ADDOP EXP" << endl;
-	cout << "$2.value: " << $2.value << endl;
+	//cout << "EXP : EXP H_ADDOP EXP" << endl;
+	//cout << "$2.value: " << $2.value << endl;
 	//Handle error
-	cout << "$1.type: " << $1.type << endl;
-	cout << "$3.type: " << $3.type << endl;
+	//cout << "$1.type: " << $1.type << endl;
+	//cout << "$3.type: " << $3.type << endl;
 
 	if ($1.type != $3.type){
 		cout << "Semantic error: <type mismatch> in line number <" << yylineno << ">" << endl;
@@ -669,10 +687,10 @@ EXP : EXP H_ADDOP EXP
 
 | H_OPR TYPE H_CPR EXP
 {
-	cout << "EXP : H_OPR TYPE H_CPR EXP" << endl;
-	cout << "$2.type: " << $2.type << endl;
-	cout << "$4.type: " << $4.type << endl;
-	cout << "to_string(32 - 8 * $4.type): " << to_string(32 - 8 * $4.type) << endl;
+	//cout << "EXP : H_OPR TYPE H_CPR EXP" << endl;
+	//cout << "$2.type: " << $2.type << endl;
+	//cout << "$4.type: " << $4.type << endl;
+	//cout << "to_string(32 - 8 * $4.type): " << to_string(32 - 8 * $4.type) << endl;
 	$$.dcl_list = $4.dcl_list;
 	for (int i=0; i < $$.dcl_list.size(); i++){
 		$$.dcl_list[i].type = $2.type;
@@ -724,13 +742,13 @@ EXP : EXP H_ADDOP EXP
 
 | H_ID
 {
-	cout << "EXP: H_ID start" << endl; 
+	//cout << "EXP: H_ID start" << endl; 
 	DCL_Node dcl_node;
 	try{
 		Symbol &symbol = symbol_table->findSymbol($1.value);
-		cout << "symbol is found: " << $1.value << endl; 
-		cout << "symbol size: " << symbol.getSize() << endl; 
-		cout << "symbol offset: " << symbol.getOffset() << endl;
+		//cout << "symbol is found: " << $1.value << endl; 
+		//cout << "symbol size: " << symbol.getSize() << endl; 
+		//cout << "symbol offset: " << symbol.getOffset() << endl;
 	
 		dcl_node.type = symbol.getSize();
 		dcl_node.name = $1.value;
@@ -746,7 +764,7 @@ EXP : EXP H_ADDOP EXP
 	try {
 		$$.type = symbol_table->findSymbol($1.value).getSize();
 		$$.reg = dcl_node.node_reg = register_manager->getRegister();
-		cout << "EXP: H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
+		//cout << "EXP: H_ID dcl_node.node_reg : " << dcl_node.node_reg << endl;
 		buffer->emit("LDI" + to_string($$.type * 8)+ " I" + to_string(dcl_node.node_reg) 
 						 + " I1 " 
 						 +  to_string(symbol_table->findSymbol($1.value).getOffset()));
@@ -757,7 +775,7 @@ EXP : EXP H_ADDOP EXP
 	}
 	$$.dcl_list.push_back(dcl_node);
 	$$.is_exp = false;
-	cout << "EXP: H_ID end" << endl;
+	//cout << "EXP: H_ID end" << endl;
 }
 
 | H_NUM
@@ -783,34 +801,40 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	//Construct function
 
 
-	cout << "called: " << $1.value << endl;
+	//cout << "called: " << $1.value << endl;
+	try {
+		Function &func = buffer->findFunction($1.value);
+	} catch(...) {
+		cout << "Semantic error: <unknown function> in line number <" << yylineno << ">" << endl;
+		exit(3);
+	}
 	Function &func = buffer->findFunction($1.value);
-	cout << "function: " << func.getName() << "is found" << endl;
-	cout << "is implemented: " << func.getIsImplemented() << endl;
+	
+	
+	//cout << "function: " << func.getName() << "is found" << endl;
+	//cout << "is implemented: " << func.getIsImplemented() << endl;
 
 	vector<unsigned int> args = func.getArguments();
-	cout << "get arguments done" << endl;
+	//cout << "get arguments done" << endl;
 	$$.type = func.getReturnType();
-	cout << "RETURN TYPE:::::::::::::: " << $$.type << endl;
+	//cout << "RETURN TYPE:::::::::::::: " << $$.type << endl;
 
-	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
-	cout << "args.size(): " << args.size() << endl;
+	//cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
+	//cout << "args.size(): " << args.size() << endl;
 	if ($3.dcl_list.size() != args.size()){
 		cout << "Semantic error: <Argument Number Mismatch> in line number <" << yylineno << ">" << endl;
 				exit(3);
 	} else {
-		cout << "CHECK FUNCTION SIGNATURE" << endl;
+		//cout << "CHECK FUNCTION SIGNATURE" << endl;
 		for (int i=0; i < args.size(); i++){
 			if (args[i] != $3.dcl_list[i].type){
-				cout << "args[i]: " << args[i] << endl;
-				cout << "$3.dcl_list[i].type: " << $3.dcl_list[i].type << endl;
+				//cout << "args[i]: " << args[i] << endl;
+				//cout << "$3.dcl_list[i].type: " << $3.dcl_list[i].type << endl;
 
 				cout << "Semantic error: <Argument Type Mismatch> in line number <" << yylineno << ">" << endl;
 				exit(3);
 			}
 		}
-
-		
 
 	
 	}
@@ -824,7 +848,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 
 	// Push registers in usage to the stack
 	int stack_counter = 0;
-	cout << "Push registers in usage to the stack , RegNum:" << register_manager->getRegistersCount() << endl;
+	//cout << "Push registers in usage to the stack , RegNum:" << register_manager->getRegistersCount() << endl;
 	for (int i = 0 ; i < register_manager->getRegistersCount(); i++)
 	{
 		buffer->emit("STI32 I" + to_string(i) + " I2 " + to_string(i*4));
@@ -849,9 +873,9 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	buffer->emit("COPYI I1 I2");
 
 	// Push call arguments
-	cout << "Push call arguments to the stack" << endl;
+	//cout << "Push call arguments to the stack" << endl;
 	int rev_counter = -4;
-	cout << "STACK COUNTER [BEFORE]: " << stack_counter << endl;
+	//cout << "STACK COUNTER [BEFORE]: " << stack_counter << endl;
 	for (int i = 0 ; i < $3.dcl_list.size(); i++)
 	{
 		if ($3.dcl_list[i].type == 1){
@@ -869,20 +893,22 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 			else
 				rev_counter -= (4 - (rev_counter % 4)); 
 		}
+		/*
 		cout << "************** $3.dcl_list.size: " << $3.dcl_list.size() << endl;
 		cout << "************** $3.dcl_list[i].name: " << $3.dcl_list[i].name << endl;
 		cout << "************** $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
+		*/
 		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter)); // Don't know why -8!!!!!
 
 
 	}
-	cout << "STACK COUNTER [AFTER]: " << stack_counter << endl;
+	//cout << "STACK COUNTER [AFTER]: " << stack_counter << endl;
 
 
 	if (!func.getIsImplemented()){
 			func.addCallLine(buffer->getQuad());
-			cout << "call lines was updated for:" << endl;
-			cout << "func name: " << func.getName() << " line: " << buffer->getQuad() << endl;
+			//cout << "call lines was updated for:" << endl;
+			//cout << "func name: " << func.getName() << " line: " << buffer->getQuad() << endl;
 		}
 
 	//JLink
@@ -905,7 +931,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	buffer->emit("SUBTI I2 I2 " + to_string(stack_counter + tmp));
 
 	// Load registers back
-	cout << "Load registers from the stack" << endl;
+	//cout << "Load registers from the stack" << endl;
 	for (int i = 0 ; i < register_manager->getRegistersCount() - 1 ; i++)
 	{										/* -1 for the register we used for the return value */
 		if (i == 2)
@@ -921,62 +947,68 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 
 CALL_ARGS : CALL_ARGLIST				
 {
-	cout << "CALL_ARGS : CALL_ARGLIST" << endl;
+	//cout << "CALL_ARGS : CALL_ARGLIST" << endl;
 	$$.dcl_list = $1.dcl_list;
+	/*
 	for (int i = 0 ; i < $$.dcl_list.size(); i++){
 		cout << "name:type " << $$.dcl_list[i].name << " : " << $$.dcl_list[i].type << endl;
 	}
+	*/
 }
 |
 {	
-	cout << "CALL_ARGLIST : EPSILON - 1" << endl;
+	//cout << "CALL_ARGLIST : EPSILON - 1" << endl;
 	$$.dcl_list.clear();
-	cout << "$$.dcl_list.size(): " << $$.dcl_list.size() << endl;
+	//cout << "$$.dcl_list.size(): " << $$.dcl_list.size() << endl;
 }
 
 
 CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP			
 {
-	cout << "CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP" << endl;
-	cout << "$3.reg: " << $3.reg << endl;
+	//cout << "CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP" << endl;
+	//cout << "$3.reg: " << $3.reg << endl;
 	for (int i = 0 ; i < $3.dcl_list.size(); i++){
-		cout << "name:type " << $3.dcl_list[i].name << " : " << $3.dcl_list[i].type << endl;
-		cout << "&&&&&& $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
+		//cout << "name:type " << $3.dcl_list[i].name << " : " << $3.dcl_list[i].type << endl;
+		//cout << "&&&&&& $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
 		if ($3.is_exp && $3.reg != $3.dcl_list[i].node_reg)
 		{
 			$3.dcl_list[i].node_reg = $3.reg;
 		}
-		cout << "%%%%%% $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
+		//cout << "%%%%%% $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
 	}
-	cout << "#######################" << endl;
+	//cout << "#######################" << endl;
 	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
+	/*
 	for (auto element: $$.dcl_list)
 		cout << "name:type " << element.name << " : " << element.type << endl;
+	*/
 }
 | EXP						
-{
+{	
+	/*
 	cout << "CALL_ARGLIST : EXP" << endl;
 	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
 	for (int i = 0; i < $$.dcl_list.size(); i++)
 	{
 		cout << "$$.dcl_list[i]-name:reg " <<  $$.dcl_list[i].name << ":" << $$.dcl_list[i].node_reg << endl;
 	}
+	*/
 }
 
 M : 
 {
-	cout << "M - Marker" << endl;
+	//cout << "M - Marker" << endl;
 	$$.quad = buffer->nextQuad();
-	cout << "$$.quad" << $$.quad << endl;
+	//cout << "$$.quad" << $$.quad << endl;
 	
 }
 
 N :
 {
-	cout << "N - Marker" << endl;
+	//cout << "N - Marker" << endl;
 	// update next_list
 	$$.next_list.insert(buffer->nextQuad());
-	cout << "buffer->nextQuad()" << buffer->nextQuad() << endl;
+	//cout << "buffer->nextQuad()" << buffer->nextQuad() << endl;
 
 	// prepare space for jump
 	buffer->emit("UJUMP ");

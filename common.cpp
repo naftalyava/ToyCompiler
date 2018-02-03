@@ -54,8 +54,9 @@ int main(int argc, char* argv[])
     //int rs;
     yyparse();
     //cout << rs << endl;
+    string tmp = inputCodeName.substr(0, inputCodeName.find("."));
     if (rs == 0) { // Parsed successfully
-      buffer->bufferToRiski(inputCodeName + ".riski");
+      buffer->bufferToRiski(tmp + ".rsk");
     }
     fclose(yyin);
     yylex_destroy();
