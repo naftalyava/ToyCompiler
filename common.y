@@ -87,7 +87,7 @@ FDEFS:	FDEFS FUNC_API
 	cout << "adding function arguments to symbol_table" << endl;
 
 	for (int i = 0; i < $2.dcl_list.size(); i++){
-		cout << "adding: " << $2.dcl_list[i].name << "size: " << $2.dcl_list[i].type << endl; 
+		cout << "adding: " << $2.dcl_list[i].name << " size: " << $2.dcl_list[i].type << endl; 
 		symbol_table->addArgumentSymbol($2.dcl_list[i].name, $2.dcl_list[i].type);
 	}
 	
@@ -727,7 +727,8 @@ EXP : EXP H_ADDOP EXP
 	try{
 		Symbol &symbol = symbol_table->findSymbol($1.value);
 		cout << "symbol is found: " << $1.value << endl; 
-		cout << "symbol is size: " << symbol.getSize() << endl; 
+		cout << "symbol size: " << symbol.getSize() << endl; 
+		cout << "symbol offset: " << symbol.getOffset() << endl;
 	
 		dcl_node.type = symbol.getSize();
 		dcl_node.name = $1.value;
@@ -890,7 +891,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	buffer->emit("LDI32 I" + to_string($$.reg) + " I1 -4");
 	
 	// Sub the extra jump we did for I2 <--------------
-	buffer->emit("SUBTI I2 I2 " + to_string(stack_counter));
+	buffer->emit("SUBTI I2 I2 " + to_string(stack_counter + tmp));
 
 	// Load registers back
 	cout << "Load registers from the stack" << endl;
