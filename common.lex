@@ -31,10 +31,10 @@ id          {letter}(_|{letter}|{digit})*
 
 %%
 
-"int8" 	    {return H_INT8;}
-"int16" 	{return H_INT16;}
-"int32" 	{return H_INT32;}
-"void" 	    {return H_VOID;}
+"int8" 	    {yylval.type = 1; return H_INT8;}
+"int16" 	{yylval.type = 2; return H_INT16;}
+"int32" 	{yylval.type = 4; return H_INT32;}
+"void" 	    {yylval.type = 0; return H_VOID;}
 "write" 	{return H_WRITE;}
 "read" 		{return H_READ;}
 "while" 	{return H_WHILE;}

@@ -23,9 +23,12 @@ class SymbolTable {
         ~SymbolTable();
         void startBlock();
         void endBlock();
-        void addSymbol(string name, unsigned int size);
+        int addSymbol(string name, unsigned int size);
         void addArgumentSymbol(string name, unsigned int size);
         Symbol& findSymbol(string name);
+        int getOffset() const {
+                return offset;
+        }
 }; 
 
 #endif

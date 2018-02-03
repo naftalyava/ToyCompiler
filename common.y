@@ -134,16 +134,17 @@ FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR
 	current_function->setName($2.value);
 	current_function->setReturnType($1.type);
 	
-	if ($1.type == VOID){
+	
+	if ($1.type == 0){
 		current_function->setReturnType(0);
 	} 
-	else if($1.type == INT8){
+	else if($1.type == 1){
 		current_function->setReturnType(1);
 	}
-	else if($1.type == INT16){
+	else if($1.type == 2){
 		current_function->setReturnType(2);
 	}
-	else if($1.type == INT32){
+	else if($1.type == 4){
 		current_function->setReturnType(4);
 	}	
 
@@ -153,6 +154,7 @@ FUNC_API:	TYPE H_ID H_OPR FUNC_ARGS H_CPR
 
 	cout <<  "currentFunc name: " << $2.value << endl;
 	cout << "currentFunc args count: " << current_function->getArguments().size() << endl;
+	cout << "current function return type: " << current_function->getReturnType() << endl;
 	
 }
 
@@ -218,7 +220,7 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 	{
 		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
 	}
-
+	/*
 	cout << "About to add symbols" << endl;
 	for (unsigned int i = 0; i < $1.dcl_list.size(); i++){
 		symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
@@ -227,7 +229,7 @@ FUNC_ARGLIST :	FUNC_ARGLIST H_COMMA DCL
 	}
 
 	cout << "Symbols were added" << endl;
-	
+	*/
 }
 	
 
@@ -290,19 +292,24 @@ DCL : H_ID H_COLON TYPE
 
 TYPE : H_INT8
 {
+	cout << "TYPE : H_INT8 [1]" << endl;
+	//cout << "$1.value: " << $1.value << " $1.type: " << $1.type << endl;
 	$$.type = 1;
 }
 
 | H_INT16
 {
+	cout << "TYPE : H_INT8 [2]" << endl;
 	$$.type = 2;
 }
 | H_INT32
 {
+	cout << "TYPE : H_INT8 [4]" << endl;
 	$$.type = 4;
 }
 | H_VOID
 {
+	cout << "TYPE : H_INT8: [0]" <<  endl;
 	$$.type = 0;
 }
 
@@ -330,17 +337,8 @@ STLIST : STLIST M STMT
 STMT :  DCL H_SEMI
 {
 	for (int i= 0; i<$1.dcl_list.size(); i++){
-		
-		if ($1.dcl_list[i].type == 1){
-			symbol_table->addSymbol($1.dcl_list[i].name, 1);
-			buffer->emit("ADD2I I2 I2 " + to_string(2));
-		} else {
-			symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
-			buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
-		}
-		
-		//symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
-		//buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
+		buffer->emit("ADD2I I2 I2 " + 
+			to_string(symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type)));
 	}
 }
 
@@ -675,7 +673,10 @@ EXP : EXP H_ADDOP EXP
 	cout << "$2.type: " << $2.type << endl;
 	cout << "$4.type: " << $4.type << endl;
 	cout << "to_string(32 - 8 * $4.type): " << to_string(32 - 8 * $4.type) << endl;
-
+	$$.dcl_list = $4.dcl_list;
+	for (int i=0; i < $$.dcl_list.size(); i++){
+		$$.dcl_list[i].type = $2.type;
+	}
 	$$.type = $2.type;
 
 	//cast from big to small
@@ -697,6 +698,7 @@ EXP : EXP H_ADDOP EXP
 	}
 	else if ($4.type < $2.type)	{
 		$$.reg = register_manager->getRegister();
+
 		if (!$4.is_const){
 			buffer->emit("SLAI I" + to_string($$.reg) + " I" 
 							 + to_string($4.reg) + " "+ to_string(32 - 8 * $4.type));
@@ -789,6 +791,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	vector<unsigned int> args = func.getArguments();
 	cout << "get arguments done" << endl;
 	$$.type = func.getReturnType();
+	cout << "RETURN TYPE:::::::::::::: " << $$.type << endl;
 
 	cout << "$3.dcl_list.size(): " << $3.dcl_list.size() << endl;
 	cout << "args.size(): " << args.size() << endl;
@@ -807,15 +810,17 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 			}
 		}
 
-		if (!func.getIsImplemented()){
-			func.addCallLine(buffer->getQuad());
-			cout << "call lines was updated for:" << endl;
-			cout << "func name: " << func.getName() << " line: " << buffer->getQuad() << endl;
-		}
+		
 
 	
 	}
  
+	int i2_offset = symbol_table->getOffset();
+	while(i2_offset %  4 != 0){
+		i2_offset++;
+	}
+	i2_offset -= symbol_table->getOffset();
+	buffer->emit("ADD2I I2 I2 " + to_string(i2_offset));
 
 	// Push registers in usage to the stack
 	int stack_counter = 0;
@@ -874,6 +879,11 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	cout << "STACK COUNTER [AFTER]: " << stack_counter << endl;
 
 
+	if (!func.getIsImplemented()){
+			func.addCallLine(buffer->getQuad());
+			cout << "call lines was updated for:" << endl;
+			cout << "func name: " << func.getName() << " line: " << buffer->getQuad() << endl;
+		}
 
 	//JLink
 	if (!func.getIsImplemented()){
@@ -882,6 +892,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	else{
 		buffer->emit("JLINK " + to_string(func.getLine()));
 	}
+	
 
 	//Move FP back
 	buffer->emit("COPYI I2 I1");
@@ -903,6 +914,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 		buffer->emit("LDI32 I" + to_string(i) + " I2 " + to_string(i*4));
 	}
 
+	buffer->emit("SUBTI I2 I2 " + to_string(i2_offset));
 
 }
 

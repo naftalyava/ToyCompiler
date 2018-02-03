@@ -50,27 +50,33 @@ void SymbolTable::addArgumentSymbol(string name, unsigned int size)
 		
 }
 
-void SymbolTable::addSymbol(string name, unsigned int size) 
+int SymbolTable::addSymbol(string name, unsigned int size) 
 {
 	cout << "Symbol: " << name << " size: " << size << " offset: " << offset << endl;
 	
 	/* START */
+	int tmp = 0;
 	if (size == 1){
 	}
 	else if (size == 2){
 		if (offset % 2 == 0){
 		} else {
+			tmp = 1;
 			offset += 1;
 		}	
 	} else {
 		if (offset % 4 == 0){}
-		else
-			offset += (4 - (offset % 4)); 
+		else{
+			tmp = (4 - (offset % 4));
+			offset += (4 - (offset % 4));
+		}
+			 
 	}
 
 	/* END */
 	symbols[level-1].push_back(Symbol(name, size, offset));
 	offset += size;
+	return tmp + size;
 }
 
 Symbol& SymbolTable::findSymbol(string name) 
