@@ -329,7 +329,7 @@ STLIST : STLIST M STMT
 STMT :  DCL H_SEMI
 {
 	for (int i= 0; i<$1.dcl_list.size(); i++){
-		/*
+		
 		if ($1.dcl_list[i].type == 1){
 			symbol_table->addSymbol($1.dcl_list[i].name, 1);
 			buffer->emit("ADD2I I2 I2 " + to_string(2));
@@ -337,9 +337,9 @@ STMT :  DCL H_SEMI
 			symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
 			buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
 		}
-		*/
-		symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
-		buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
+		
+		//symbol_table->addSymbol($1.dcl_list[i].name, $1.dcl_list[i].type);
+		//buffer->emit("ADD2I I2 I2 " + to_string($1.dcl_list[i].type));
 	}
 }
 
@@ -816,8 +816,11 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 
 	int tmp = 0;
 	for (int i = $3.dcl_list.size()-1 ; i >= 0; i--)
-	{
-		tmp += (int)$3.dcl_list[i].type;
+	{	
+		if ((int)$3.dcl_list[i].type == 1)
+			tmp += 2;
+		else
+			tmp += (int)$3.dcl_list[i].type;
 	}
 
 	//Make room for Return value And Arguments
@@ -831,13 +834,18 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	// Push call arguments
 	cout << "Push call arguments to the stack" << endl;
 	int rev_counter = -4;
+	cout << "STACK COUNTER [BEFORE]: " << stack_counter << endl;
 	for (int i = $3.dcl_list.size()-1 ; i >= 0; i--)
 	{
 		//cout << "PRIIIIINT: " << rev_counter - (int)$3.dcl_list[i].type << endl;
 		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter - (int)$3.dcl_list[i].type)); // Don't know why -8!!!!!
 		rev_counter -= (int)$3.dcl_list[i].type;
-		stack_counter += (int)$3.dcl_list[i].type;
+		if ((int)$3.dcl_list[i].type == 1)
+			stack_counter += 2;
+		else
+			stack_counter += (int)$3.dcl_list[i].type;
 	}
+	cout << "STACK COUNTER [AFTER]: " << stack_counter << endl;
 
 
 
