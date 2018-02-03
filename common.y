@@ -628,6 +628,7 @@ EXP : EXP H_ADDOP EXP
 		cout << "ERROR" << endl;
 	}
 	$$.type = $1.type;
+	$$.is_exp = true;
 	
 }
 
@@ -656,11 +657,13 @@ EXP : EXP H_ADDOP EXP
 		cout << "ERROR" << endl;
 	}
 	$$.type = $1.type;
+	$$.is_exp = true;
 }
 
 | H_OPR EXP H_CPR						
 {
 	$$ = $2;
+	$$.is_exp = $2.is_exp;
 }
 
 | H_OPR TYPE H_CPR EXP
@@ -710,6 +713,7 @@ EXP : EXP H_ADDOP EXP
 	else {
 		$$.reg = $4.reg;
 	}
+	$$.is_exp = $4.is_exp;
 		
 }
 
@@ -746,6 +750,7 @@ EXP : EXP H_ADDOP EXP
 		exit(3);
 	}
 	$$.dcl_list.push_back(dcl_node);
+	$$.is_exp = false;
 	cout << "EXP: H_ID end" << endl;
 }
 
@@ -756,11 +761,13 @@ EXP : EXP H_ADDOP EXP
 	$$.reg = register_manager->getRegister();
 	buffer->emit("COPYI I" + to_string($$.reg) 
 						   + " " + $1.value);
+	$$.is_exp = false;
 }
 		
 | CALL
 {
 	$$.type = $1.type;
+	$$.is_exp = $1.is_exp;
 }
 
 
@@ -852,7 +859,8 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 			else
 				rev_counter -= (4 - (rev_counter % 4)); 
 		}
-
+		cout << "************** $3.dcl_list.size: " << $3.dcl_list.size() << endl;
+		cout << "************** $3.dcl_list[i].name: " << $3.dcl_list[i].name << endl;
 		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter)); // Don't know why -8!!!!!
 
 
@@ -911,10 +919,15 @@ CALL_ARGS : CALL_ARGLIST
 CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP			
 {
 	cout << "CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP" << endl;
+	cout << "$3.reg: " << $3.reg << endl;
 	for (int i = 0 ; i < $3.dcl_list.size(); i++){
 		cout << "name:type " << $3.dcl_list[i].name << " : " << $3.dcl_list[i].type << endl;
+		if ($3.is_exp && $3.reg != $3.dcl_list[i].node_reg)
+		{
+			$3.dcl_list[i].node_reg = $3.reg;
+		}
 	}
-
+	cout << "#######################" << endl;
 	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());
 	for (auto element: $$.dcl_list)
 		cout << "name:type " << element.name << " : " << element.type << endl;
@@ -925,7 +938,7 @@ CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP
 	cout << "$$.dcl_list size: " <<  $$.dcl_list.size() << endl;
 	for (int i = 0; i < $$.dcl_list.size(); i++)
 	{
-		cout << "$$.dcl_list[i]: " <<  $$.dcl_list[i].name << endl;
+		cout << "$$.dcl_list[i]-name:reg " <<  $$.dcl_list[i].name << ":" << $$.dcl_list[i].node_reg << endl;
 	}
 }
 
