@@ -835,15 +835,28 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	cout << "Push call arguments to the stack" << endl;
 	int rev_counter = -4;
 	cout << "STACK COUNTER [BEFORE]: " << stack_counter << endl;
-	for (int i = $3.dcl_list.size()-1 ; i >= 0; i--)
+	for (int i = 0 ; i < $3.dcl_list.size(); i++)
 	{
-		//cout << "PRIIIIINT: " << rev_counter - (int)$3.dcl_list[i].type << endl;
-		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter - (int)$3.dcl_list[i].type)); // Don't know why -8!!!!!
-		rev_counter -= (int)$3.dcl_list[i].type;
-		if ((int)$3.dcl_list[i].type == 1)
-			stack_counter += 2;
-		else
-			stack_counter += (int)$3.dcl_list[i].type;
+		//cout << "PRIIIIINT: " << (int)$3.dcl_list[i].value << endl;
+		if ($3.dcl_list[i].type == 1){
+			rev_counter -= 1;
+		}
+		else if ($3.dcl_list[i].type == 2){
+			rev_counter -= 2;
+			if (rev_counter % 2 == 0){
+			} else {
+				rev_counter -= 1;
+			}	
+		} else {
+			rev_counter -= 4;
+			if (rev_counter % 4 == 0){}
+			else
+				rev_counter -= (4 - (rev_counter % 4)); 
+		}
+
+		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter)); // Don't know why -8!!!!!
+		//rev_counter -= (int)$3.dcl_list[i].type;
+
 	}
 	cout << "STACK COUNTER [AFTER]: " << stack_counter << endl;
 
