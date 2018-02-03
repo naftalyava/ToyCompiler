@@ -82,8 +82,6 @@ FDEFS:	FDEFS FUNC_API
 
 	// if there is no return to the current function (add return)
 	// Set current function as NULL
-	cout << "Allocate new ST" << endl;
-	//symbol_table = new SymbolTable();
 	register_manager->startScope();
 
 	cout << "adding function arguments to symbol_table" << endl;
@@ -97,9 +95,12 @@ FDEFS:	FDEFS FUNC_API
 } BLK {
 	buffer->emit("RETRN");
 	//close scope
-	//delete symbol_table;
-	symbol_table->erase();
+	delete symbol_table;
 	register_manager->endScope();
+	
+	cout << "Re-Allocate new ST" << endl;
+	symbol_table = new SymbolTable();
+
 }
 
 | FDEFS FUNC_API H_SEMI 
@@ -115,7 +116,6 @@ FDEFS:	FDEFS FUNC_API
 
 	buffer->addFunction(*current_function);
 	current_function->clearArgs();
-	cout << "Delete ST" << endl;
 	// Set current function as NULL
 }
 |
@@ -433,6 +433,7 @@ ASSN : LVAL H_ASSIGN EXP H_SEMI
 {
 	cout << "ASSN : LVAL H_ASSIGN EXP H_SEMI" << endl;
 	cout << "$1.type: " << $1.type << " $3.type: " << $3.type << endl;
+	cout << "$1.reg: " << $1.reg << " $3.reg: " << $3.reg << endl;
 	if ($1.type != $3.type)
 	{
 		cout << "Semantic error: <Assignment type mismatch> in line number <" << yylineno << ">" << endl;
@@ -455,6 +456,7 @@ LVAL : H_ID
 	
 		dcl_node.type = symbol.getSize();
 		dcl_node.name = $1.value;
+		dcl_node.node_offset = symbol.getOffset();
 	}
 	catch (...)
 	{
@@ -714,7 +716,7 @@ EXP : EXP H_ADDOP EXP
 	else {
 		$$.reg = $4.reg;
 	}
-	//$$.is_exp = $4.is_exp;
+	$$.is_exp = true;//$4.is_exp;
 		
 }
 
@@ -768,6 +770,7 @@ EXP : EXP H_ADDOP EXP
 | CALL
 {
 	$$.type = $1.type;
+	$$.reg = $1.reg;
 	$$.is_exp = $1.is_exp;
 }
 
@@ -862,6 +865,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 		}
 		cout << "************** $3.dcl_list.size: " << $3.dcl_list.size() << endl;
 		cout << "************** $3.dcl_list[i].name: " << $3.dcl_list[i].name << endl;
+		cout << "************** $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
 		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter)); // Don't know why -8!!!!!
 
 
@@ -882,8 +886,9 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	buffer->emit("COPYI I2 I1");
 	
 	//Load return value (always size == 4) --> Maybe we need to cast according to Func return type
-	buffer->emit("LDI32 I" + to_string(register_manager->getRegister()) + " I1 -4");
-
+	$$.reg = register_manager->getRegister();
+	buffer->emit("LDI32 I" + to_string($$.reg) + " I1 -4");
+	
 	// Sub the extra jump we did for I2 <--------------
 	buffer->emit("SUBTI I2 I2 " + to_string(stack_counter));
 
@@ -923,10 +928,12 @@ CALL_ARGLIST : CALL_ARGLIST H_COMMA EXP
 	cout << "$3.reg: " << $3.reg << endl;
 	for (int i = 0 ; i < $3.dcl_list.size(); i++){
 		cout << "name:type " << $3.dcl_list[i].name << " : " << $3.dcl_list[i].type << endl;
+		cout << "&&&&&& $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
 		if ($3.is_exp && $3.reg != $3.dcl_list[i].node_reg)
 		{
 			$3.dcl_list[i].node_reg = $3.reg;
 		}
+		cout << "%%%%%% $3.dcl_list[i].node_reg: " << $3.dcl_list[i].node_reg << endl;
 	}
 	cout << "#######################" << endl;
 	$$.dcl_list.insert($$.dcl_list.end(), $3.dcl_list.begin(), $3.dcl_list.end());

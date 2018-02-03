@@ -28,6 +28,7 @@ typedef struct {
     unsigned int type;
     unsigned int quad;
     unsigned int node_reg;
+    int node_offset;
 } DCL_Node;
 
 
@@ -36,6 +37,7 @@ typedef struct{
     unsigned int type;
     bool is_const;
     bool is_exp;
+    int offset;
     unsigned int quad;
     unsigned int reg;
     vector<DCL_Node> dcl_list;
