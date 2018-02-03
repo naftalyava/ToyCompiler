@@ -2,16 +2,15 @@
 #include <stack>
 #include <iostream>
 
-/**************************************************************************/
-/*                           Globals                                      */
-/**************************************************************************/
+/*
+    Globals                                      
+*/
+
 
 Buffer *buffer = new Buffer();
 SymbolTable *symbol_table = new SymbolTable();
 Function *current_function = new Function(); 
 RegisterManager *register_manager = new RegisterManager();
-
-int rs;
 
 
 extern int yyparse ();
@@ -19,9 +18,9 @@ extern void yylex_destroy();
 extern	FILE *yyin;
 extern 	int yylex();
 extern int yydebug;
-/**************************************************************************/
-/*                           Main of parser                               */
-/**************************************************************************/
+/*
+    parser
+*/
 
 int main(int argc, char* argv[])
 {
@@ -47,17 +46,14 @@ int main(int argc, char* argv[])
     	  exit(0);
     }
 
-//#if YYDEBUG
-//    yydebug=1;
-//#endif
+
     
-    //int rs;
+
     yyparse();
-    //cout << rs << endl;
+
     string tmp = inputCodeName.substr(0, inputCodeName.find("."));
-    if (rs == 0) { // Parsed successfully
-      buffer->bufferToRiski(tmp + ".rsk");
-    }
+    buffer->bufferToRiski(tmp + ".rsk");
+
     fclose(yyin);
     yylex_destroy();
 

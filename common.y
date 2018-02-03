@@ -9,18 +9,18 @@
 #define YYDEBUG 1
 
 
-/*******************************************
-* pre-declarations for functions and variables 
-* that we will use in the code later.
-*******************************************/
+/*
+	pre-declarations for functions
+*/
 extern int yylineno;
 extern char* yytext;
 extern int yylex();
 void yyerror(const char*);
 
-/*******************************************
-* Globals
-*******************************************/
+/*
+	Globals
+*/
+
 extern Buffer *buffer;
 extern SymbolTable *symbol_table;
 extern Function *current_function;
