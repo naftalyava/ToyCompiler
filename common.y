@@ -83,7 +83,7 @@ FDEFS:	FDEFS FUNC_API
 	// if there is no return to the current function (add return)
 	// Set current function as NULL
 	cout << "Allocate new ST" << endl;
-	symbol_table = new SymbolTable();
+	//symbol_table = new SymbolTable();
 	register_manager->startScope();
 
 	cout << "adding function arguments to symbol_table" << endl;
@@ -97,7 +97,8 @@ FDEFS:	FDEFS FUNC_API
 } BLK {
 	buffer->emit("RETRN");
 	//close scope
-	delete symbol_table;
+	//delete symbol_table;
+	symbol_table->erase();
 	register_manager->endScope();
 }
 
@@ -713,7 +714,7 @@ EXP : EXP H_ADDOP EXP
 	else {
 		$$.reg = $4.reg;
 	}
-	$$.is_exp = $4.is_exp;
+	//$$.is_exp = $4.is_exp;
 		
 }
 
@@ -960,8 +961,7 @@ N :
 	// prepare space for jump
 	buffer->emit("UJUMP ");
 }
-			
-			
+					
 
 %%
 
