@@ -837,7 +837,6 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 	cout << "STACK COUNTER [BEFORE]: " << stack_counter << endl;
 	for (int i = 0 ; i < $3.dcl_list.size(); i++)
 	{
-		//cout << "PRIIIIINT: " << (int)$3.dcl_list[i].value << endl;
 		if ($3.dcl_list[i].type == 1){
 			rev_counter -= 1;
 		}
@@ -855,7 +854,7 @@ CALL : H_ID H_OPR CALL_ARGS H_CPR
 		}
 
 		buffer->emit("STI" + to_string(8 * $3.dcl_list[i].type) + " I" + to_string($3.dcl_list[i].node_reg) + " I1 " + to_string(rev_counter)); // Don't know why -8!!!!!
-		//rev_counter -= (int)$3.dcl_list[i].type;
+
 
 	}
 	cout << "STACK COUNTER [AFTER]: " << stack_counter << endl;
